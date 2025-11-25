@@ -54,6 +54,7 @@ app.get("/humans/:id", async (req, res) => {
 });
 
 // InsertHuman
+app.use(express.static("public"));
 app.post("/humans", async (req, res) => {
   const { Citizen_ID, LastName, FirstName, DateOfBirth, Email, Gender } =
     req.body;
@@ -82,6 +83,7 @@ app.post("/humans", async (req, res) => {
 });
 
 // UpdateHuman
+app.use(express.static("public"));
 app.put("/humans/:id", async (req, res) => {
   const { id } = req.params;
   const { FirstName, LastName, DateOfBirth, Gender, Email } = req.body;
