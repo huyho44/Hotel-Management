@@ -12,7 +12,6 @@ app.get("/", (req, res) => {
 
 // ========== HUMAN ==========
 
-// Lấy toàn bộ Human
 app.get("/humans", async (req, res) => {
   try {
     await poolConnect;
@@ -20,7 +19,7 @@ app.get("/humans", async (req, res) => {
     const result = await pool.request().query(`
       SELECT *
       FROM Human
-    `); // ⚠ nếu bảng không tên Human thì sửa lại
+    `);
 
     res.json(result.recordset);
   } catch (err) {
@@ -29,7 +28,7 @@ app.get("/humans", async (req, res) => {
   }
 });
 
-// Lấy 1 Human theo HumanID
+// Get Human based on ID
 app.get("/humans/:id", async (req, res) => {
   const { id } = req.params;
 
