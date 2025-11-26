@@ -1,124 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Human Management</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      h1,
-      h2 {
-        margin-bottom: 10px;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f0f0f0;
-      }
-      form {
-        margin-bottom: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: flex-end;
-      }
-      label {
-        display: flex;
-        flex-direction: column;
-        font-size: 14px;
-      }
-      input {
-        padding: 4px 6px;
-      }
-      button {
-        padding: 6px 10px;
-        cursor: pointer;
-      }
-      .error {
-        color: red;
-        margin-top: 10px;
-      }
-      .success {
-        color: green;
-        margin-top: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Human Management</h1>
+<div id="humans-page">
+  <style>
+    #humans-page {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
 
-    <h2>Thêm / Sửa Human</h2>
+    #humans-page h1,
+    #humans-page h2 {
+      margin-bottom: 10px;
+    }
 
-    <form id="human-form">
-      <!-- mode: create / edit -->
-      <input type="hidden" id="mode" value="create" />
-      <input type="hidden" id="editId" />
+    #humans-page table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
 
-      <label>
-        Citizen_ID (INT)
-        <input type="number" id="citizenId" required />
-      </label>
+    #humans-page th,
+    #humans-page td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
 
-      <label>
-        Last_Name
-        <input type="text" id="lastName" required />
-      </label>
+    #humans-page th {
+      background-color: #f0f0f0;
+    }
 
-      <label>
-        First_Name
-        <input type="text" id="firstName" required />
-      </label>
+    #humans-page form {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+    }
 
-      <label>
-        Birth_Date
-        <input type="date" id="dob" required />
-      </label>
+    #humans-page label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
 
-      <label>
-        Email
-        <input type="email" id="email" required />
-      </label>
+    #humans-page input {
+      padding: 4px 6px;
+    }
 
-      <label>
-        Gender (M/F)
-        <input type="text" id="gender" maxlength="1" required />
-      </label>
+    #humans-page button {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
 
-      <button type="submit">Lưu</button>
-      <button type="button" id="reset-btn">Reset</button>
-    </form>
+    #humans-page .error {
+      color: red;
+      margin-top: 10px;
+    }
 
-    <div id="message"></div>
+    #humans-page .success {
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
 
-    <h2>Danh sách Human</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Citizen_ID</th>
-          <th>Last_Name</th>
-          <th>First_Name</th>
-          <th>Birth_Date</th>
-          <th>Email</th>
-          <th>Gender</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="human-table-body"></tbody>
-    </table>
+  <h1>Human Management</h1>
 
-    <script>
-      // Vì file này được serve cùng domain với API nên dùng path tương đối là đủ
+  <h2>Insert/Update Human</h2>
+
+  <form id="human-form">
+    <input type="hidden" id="mode" value="create" />
+    <input type="hidden" id="editId" />
+
+    <label>
+      Citizen_ID (INT)
+      <input type="number" id="citizenId" required />
+    </label>
+
+    <label>
+      Last_Name
+      <input type="text" id="lastName" required />
+    </label>
+
+    <label>
+      First_Name
+      <input type="text" id="firstName" required />
+    </label>
+
+    <label>
+      Birth_Date
+      <input type="date" id="dob" required />
+    </label>
+
+    <label>
+      Email
+      <input type="email" id="email" required />
+    </label>
+
+    <label>
+      Gender (M/F)
+      <input type="text" id="gender" maxlength="1" required />
+    </label>
+
+    <button type="submit">Save</button>
+    <button type="button" id="reset-btn">Reset</button>
+  </form>
+
+  <div id="message"></div>
+
+  <h2>List of Humans</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Citizen_ID</th>
+        <th>Last_Name</th>
+        <th>First_Name</th>
+        <th>Birth_Date</th>
+        <th>Email</th>
+        <th>Gender</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="human-table-body"></tbody>
+  </table>
+  <script>
+    (function () {
+
       const API_BASE = "";
 
       const form = document.getElementById("human-form");
@@ -134,7 +139,6 @@
       const tableBody = document.getElementById("human-table-body");
       const resetBtn = document.getElementById("reset-btn");
 
-      // Load danh sách Human
       async function loadHumans() {
         tableBody.innerHTML = "<tr><td colspan='7'>Loading...</td></tr>";
         try {
@@ -142,9 +146,7 @@
           const data = await res.json();
           renderTable(data);
         } catch (err) {
-          console.error(err);
-          tableBody.innerHTML =
-            "<tr><td colspan='7'>Error loading humans</td></tr>";
+          tableBody.innerHTML = "<tr><td colspan='7'>Error loading humans</td></tr>";
         }
       }
 
@@ -155,7 +157,7 @@
         }
 
         tableBody.innerHTML = "";
-        humans.forEach((h) => {
+        humans.forEach(h => {
           const tr = document.createElement("tr");
 
           const birthStr = h.Birth_Date
@@ -165,19 +167,17 @@
             : "";
 
           tr.innerHTML = `
-            <td>${h.Citizen_ID}</td>
-            <td>${h.Last_Name}</td>
-            <td>${h.First_Name}</td>
-            <td>${birthStr}</td>
-            <td>${h.Email ?? ""}</td>
-            <td>${h.Gender ?? ""}</td>
-            <td>
-              <button data-action="edit" data-id="${h.Citizen_ID}">Edit</button>
-              <button data-action="delete" data-id="${
-                h.Citizen_ID
-              }">Delete</button>
-            </td>
-          `;
+        <td>${h.Citizen_ID}</td>
+        <td>${h.Last_Name}</td>
+        <td>${h.First_Name}</td>
+        <td>${birthStr}</td>
+        <td>${h.Email ?? ""}</td>
+        <td>${h.Gender ?? ""}</td>
+        <td>
+          <button data-action="edit" data-id="${h.Citizen_ID}">Edit</button>
+          <button data-action="delete" data-id="${h.Citizen_ID}">Delete</button>
+        </td>
+      `;
           tableBody.appendChild(tr);
         });
       }
@@ -187,144 +187,103 @@
         messageDiv.className = type === "error" ? "error" : "success";
       }
 
-      function clearMessage() {
-        messageDiv.textContent = "";
-        messageDiv.className = "";
-      }
-
       function resetForm() {
         modeInput.value = "create";
         editIdInput.value = "";
         form.reset();
       }
 
-      // Submit form: create hoặc update
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        clearMessage();
 
-        const mode = modeInput.value; // 'create' hoặc 'edit'
-        const id = citizenIdInput.value
-          ? parseInt(citizenIdInput.value, 10)
-          : null;
+        const mode = modeInput.value;
+        const id = parseInt(citizenIdInput.value, 10);
 
         const bodyCreate = {
-          // POST /humans dùng body:
-          // { Citizen_ID, LastName, FirstName, DateOfBirth, Email, Gender }
           Citizen_ID: id,
           LastName: lastNameInput.value,
           FirstName: firstNameInput.value,
           DateOfBirth: dobInput.value,
           Email: emailInput.value,
-          Gender: genderInput.value,
+          Gender: genderInput.value
         };
 
         const bodyUpdate = {
-          // PUT /humans/:id dùng body:
-          // { FirstName, LastName, DateOfBirth, Gender, Email }
           FirstName: firstNameInput.value,
           LastName: lastNameInput.value,
           DateOfBirth: dobInput.value,
           Gender: genderInput.value,
-          Email: emailInput.value,
+          Email: emailInput.value
         };
 
         try {
           let res;
-
           if (mode === "create") {
             res = await fetch(`${API_BASE}/humans`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(bodyCreate),
+              body: JSON.stringify(bodyCreate)
             });
           } else {
-            // edit
             const editId = editIdInput.value;
             res = await fetch(`${API_BASE}/humans/${editId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(bodyUpdate),
+              body: JSON.stringify(bodyUpdate)
             });
           }
 
           const data = await res.json();
-          if (!res.ok) {
-            showMessage(`Error: ${data.error || "Unknown error"}`, "error");
-          } else {
+
+          if (!res.ok) showMessage(`Error: ${data.error}`, "error");
+          else {
             showMessage(data.message || "Success", "success");
             await loadHumans();
             resetForm();
           }
         } catch (err) {
-          console.error(err);
           showMessage("Request failed", "error");
         }
       });
 
-      // Xử lý nút Edit / Delete
       tableBody.addEventListener("click", async (e) => {
         const btn = e.target;
-        const action = btn.getAttribute("data-action");
-        const id = btn.getAttribute("data-id");
-        if (!action || !id) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
 
         if (action === "edit") {
-          try {
-            const res = await fetch(`${API_BASE}/humans/${id}`);
-            const human = await res.json();
-            if (!res.ok) {
-              showMessage(human.error || "Error loading human", "error");
-              return;
-            }
+          const res = await fetch(`/humans/${id}`);
+          const human = await res.json();
 
-            modeInput.value = "edit";
-            editIdInput.value = human.Citizen_ID;
-            citizenIdInput.value = human.Citizen_ID;
-            lastNameInput.value = human.Last_Name;
-            firstNameInput.value = human.First_Name;
-            dobInput.value = human.Birth_Date
-              ? typeof human.Birth_Date === "string"
-                ? human.Birth_Date.substring(0, 10)
-                : new Date(human.Birth_Date).toISOString().substring(0, 10)
-              : "";
-            emailInput.value = human.Email ?? "";
-            genderInput.value = human.Gender ?? "";
-          } catch (err) {
-            console.error(err);
-            showMessage("Error loading human", "error");
-          }
+          modeInput.value = "edit";
+          editIdInput.value = human.Citizen_ID;
+          citizenIdInput.value = human.Citizen_ID;
+          lastNameInput.value = human.Last_Name;
+          firstNameInput.value = human.First_Name;
+          dobInput.value = human.Birth_Date.substring(0, 10);
+          emailInput.value = human.Email;
+          genderInput.value = human.Gender;
         }
 
         if (action === "delete") {
-          if (!confirm(`Xóa Human với Citizen_ID = ${id}?`)) return;
+          if (!confirm(`Delete Human ${id}?`)) return;
 
-          try {
-            const res = await fetch(`${API_BASE}/humans/${id}`, {
-              method: "DELETE",
-            });
+          const res = await fetch(`/humans/${id}`, { method: "DELETE" });
+          const data = await res.json();
 
-            const data = await res.json();
-            if (!res.ok) {
-              showMessage(`Error: ${data.error || "Unknown error"}`, "error");
-            } else {
-              showMessage(data.message || "Deleted", "success");
-              await loadHumans();
-            }
-          } catch (err) {
-            console.error(err);
-            showMessage("Delete request failed", "error");
-          }
+          showMessage(data.message, "success");
+          await loadHumans();
         }
       });
 
       resetBtn.addEventListener("click", () => {
         resetForm();
-        clearMessage();
+        messageDiv.textContent = "";
       });
 
-      // Load lần đầu
       loadHumans();
-    </script>
-  </body>
-</html>
+
+    })();
+  </script>
+
+</div>
