@@ -239,21 +239,14 @@ app.get("/managers", async (req, res) => {
 
 // Insert Manager
 app.post("/managers", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const { Citizen_ID, Branch_ID } = req.body;
 
   try {
     await poolConnect;
 
     const request = pool.request();
     request.input("Citizen_ID", sql.Int, Citizen_ID);
-    request.input("Last_Name", sql.VarChar(100), LastName);
-    request.input("First_Name", sql.VarChar(100), FirstName);
-    request.input("Birth_Date", sql.Date, DateOfBirth);
-    request.input("Email", sql.VarChar(100), Email);
-    request.input("Gender", sql.Char(1), Gender);
-    request.input("Salary", sql.Decimal(10, 2), Salary);
-    request.input("Supervisor_ID", sql.Int, Supervisor_ID || null);
-    request.input("Branch_ID", sql.Int, Branch_ID);
+    request.input("Branch_ID", sql.Int, Branch_ID ?? null);
 
     const result = await request.execute("InsertManager");
 
@@ -339,21 +332,13 @@ app.get("/receptionists", async (req, res) => {
 
 // POST
 app.post("/receptionists", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const { Citizen_ID } = req.body;
   try {
     await poolConnect;
     const request = pool.request();
     request.input("Citizen_ID", sql.Int, Citizen_ID);
-    request.input("Last_Name", sql.VarChar(100), LastName);
-    request.input("First_Name", sql.VarChar(100), FirstName);
-    request.input("Birth_Date", sql.Date, DateOfBirth);
-    request.input("Email", sql.VarChar(100), Email);
-    request.input("Gender", sql.Char(1), Gender);
-    request.input("Salary", sql.Decimal(10, 2), Salary);
-    request.input("Supervisor_ID", sql.Int, Supervisor_ID || null);
-    request.input("Branch_ID", sql.Int, Branch_ID);
 
-    const result = await request.execute("InsertReceptionist"); // create this procedure
+    const result = await request.execute("InsertReceptionist");
     res.status(201).json({ message: "Receptionist inserted successfully", data: result.recordset ?? null });
   } catch (err) {
     console.error("Error in POST /receptionists:", err);
@@ -429,21 +414,13 @@ app.get("/service-staffs", async (req, res) => {
 
 // Insert Service Staff
 app.post("/service-staffs", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const { Citizen_ID } = req.body;
 
   try {
     await poolConnect;
 
     const request = pool.request();
     request.input("Citizen_ID", sql.Int, Citizen_ID);
-    request.input("Last_Name", sql.VarChar(100), LastName);
-    request.input("First_Name", sql.VarChar(100), FirstName);
-    request.input("Birth_Date", sql.Date, DateOfBirth);
-    request.input("Email", sql.VarChar(100), Email);
-    request.input("Gender", sql.Char(1), Gender);
-    request.input("Salary", sql.Decimal(10, 2), Salary);
-    request.input("Supervisor_ID", sql.Int, Supervisor_ID || null);
-    request.input("Branch_ID", sql.Int, Branch_ID);
 
     const result = await request.execute("InsertServiceStaff");
 
