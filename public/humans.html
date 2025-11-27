@@ -253,6 +253,10 @@
 
         if (action === "edit") {
           const res = await fetch(`/humans/${id}`);
+          if (!res.ok) {
+            showMessage("Failed to load human", "error");
+            return;
+          }
           const human = await res.json();
 
           modeInput.value = "edit";
@@ -268,11 +272,19 @@
         if (action === "delete") {
           if (!confirm(`Delete Human ${id}?`)) return;
 
-          const res = await fetch(`/humans/${id}`, { method: "DELETE" });
-          const data = await res.json();
+          try {
+            const res = await fetch(`/humans/${id}`, { method: "DELETE" });
+            const data = await res.json();
 
-          showMessage(data.message, "success");
-          await loadHumans();
+            if (!res.ok) {
+              showMessage(data.error || data.message || "Delete failed", "error");
+            } else {
+              showMessage(data.message || "Deleted", "success");
+              await loadHumans();
+            }
+          } catch (err) {
+            showMessage("Request failed", "error");
+          }
         }
       });
 
