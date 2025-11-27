@@ -5,10 +5,6 @@ const { sql, pool, poolConnect } = require("./db");
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
-// Route test server
-app.get("/", (req, res) => {
-  res.send("Hotel API is running ✅");
-});
 
 // ========== HUMAN ==========
 
@@ -125,19 +121,19 @@ app.get("/employees", async (req, res) => {
     await poolConnect;
 
     const result = await pool.request().query(`
-      SELECT 
-        H.Citizen_ID,
-        H.First_Name,
-        H.Last_Name,
-        H.Birth_Date,
-        H.Email,
-        H.Gender,
-        E.Branch_ID,
-        E.Salary,
-        E.Supervisor_ID
-      FROM Employee E
-      JOIN Human H ON H.Citizen_ID = E.Citizen_ID
-    `);
+  SELECT 
+    H.Citizen_ID,       
+    H.First_Name,
+    H.Last_Name,
+    H.Birth_Date,
+    H.Email,
+    H.Gender,
+    E.Branch_ID,
+    E.Salary,
+    E.Supervisor_ID
+  FROM Human H
+  JOIN Employee E ON E.Citizen_ID = H.Citizen_ID
+`);
 
     res.json(result.recordset);
   } catch (err) {
@@ -146,10 +142,47 @@ app.get("/employees", async (req, res) => {
   }
 });
 
+//Get Employee based on ID
+app.get("/employees/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await poolConnect;
+
+    const result = await pool.request().input("Citizen_ID", sql.Int, id).query(`
+        SELECT 
+          Citizen_ID,
+          Salary,
+          Supervisor_ID,
+          Branch_ID
+        FROM Employee
+        WHERE Citizen_ID = @Citizen_ID
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    res.json(result.recordset[0]);
+  } catch (err) {
+    console.error("Error in GET /employees/:id:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
 // POST
 app.post("/employees", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    Citizen_ID,
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
   try {
     await poolConnect;
     const request = pool.request();
@@ -164,7 +197,10 @@ app.post("/employees", async (req, res) => {
     request.input("Branch_ID", sql.Int, Branch_ID);
 
     const result = await request.execute("InsertFullEmployee"); // create this procedure
-    res.status(201).json({ message: "Employee inserted successfully", data: result.recordset ?? null });
+    res.status(201).json({
+      message: "Employee inserted successfully",
+      data: result.recordset ?? null,
+    });
   } catch (err) {
     console.error("Error in POST /employees:", err);
     const message =
@@ -179,7 +215,16 @@ app.post("/employees", async (req, res) => {
 // PUT
 app.put("/employees/:id", async (req, res) => {
   const { id } = req.params;
-  const { FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
   try {
     await poolConnect;
     const request = pool.request();
@@ -194,7 +239,10 @@ app.put("/employees/:id", async (req, res) => {
     request.input("Branch_ID", sql.Int, Branch_ID ?? null);
 
     const result = await request.execute("UpdateFullEmployee"); // create this procedure
-    res.json({ message: "Employee updated successfully", data: result.recordset ?? null });
+    res.json({
+      message: "Employee updated successfully",
+      data: result.recordset ?? null,
+    });
   } catch (err) {
     console.error("Error in PUT /employees/:id:", err);
     const message =
@@ -205,7 +253,6 @@ app.put("/employees/:id", async (req, res) => {
     res.status(500).json({ error: message });
   }
 });
-
 
 // ========== MANAGERS ==========
 
@@ -236,10 +283,19 @@ app.get("/managers", async (req, res) => {
   }
 });
 
-
 // Insert Manager
 app.post("/managers", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    Citizen_ID,
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
 
   try {
     await poolConnect;
@@ -275,7 +331,16 @@ app.post("/managers", async (req, res) => {
 // Update Manager
 app.put("/managers/:id", async (req, res) => {
   const { id } = req.params;
-  const { FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
 
   try {
     await poolConnect;
@@ -308,7 +373,6 @@ app.put("/managers/:id", async (req, res) => {
   }
 });
 
-
 // ========== RECEPTIONISTS ==========
 app.get("/receptionists", async (req, res) => {
   try {
@@ -339,7 +403,17 @@ app.get("/receptionists", async (req, res) => {
 
 // POST
 app.post("/receptionists", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    Citizen_ID,
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
   try {
     await poolConnect;
     const request = pool.request();
@@ -354,7 +428,10 @@ app.post("/receptionists", async (req, res) => {
     request.input("Branch_ID", sql.Int, Branch_ID);
 
     const result = await request.execute("InsertReceptionist"); // create this procedure
-    res.status(201).json({ message: "Receptionist inserted successfully", data: result.recordset ?? null });
+    res.status(201).json({
+      message: "Receptionist inserted successfully",
+      data: result.recordset ?? null,
+    });
   } catch (err) {
     console.error("Error in POST /receptionists:", err);
     const message =
@@ -369,7 +446,16 @@ app.post("/receptionists", async (req, res) => {
 // PUT
 app.put("/receptionists/:id", async (req, res) => {
   const { id } = req.params;
-  const { FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
   try {
     await poolConnect;
     const request = pool.request();
@@ -384,7 +470,10 @@ app.put("/receptionists/:id", async (req, res) => {
     request.input("Branch_ID", sql.Int, Branch_ID ?? null);
 
     const result = await request.execute("UpdateReceptionist"); // create this procedure
-    res.json({ message: "Receptionist updated successfully", data: result.recordset ?? null });
+    res.json({
+      message: "Receptionist updated successfully",
+      data: result.recordset ?? null,
+    });
   } catch (err) {
     console.error("Error in PUT /receptionists/:id:", err);
     const message =
@@ -395,8 +484,6 @@ app.put("/receptionists/:id", async (req, res) => {
     res.status(500).json({ error: message });
   }
 });
-
-
 
 // ========== SERVICE STAFF ==========
 app.get("/service-staffs", async (req, res) => {
@@ -426,10 +513,19 @@ app.get("/service-staffs", async (req, res) => {
   }
 });
 
-
 // Insert Service Staff
 app.post("/service-staffs", async (req, res) => {
-  const { Citizen_ID, FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    Citizen_ID,
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
 
   try {
     await poolConnect;
@@ -465,7 +561,16 @@ app.post("/service-staffs", async (req, res) => {
 // Update Service Staff
 app.put("/service-staffs/:id", async (req, res) => {
   const { id } = req.params;
-  const { FirstName, LastName, DateOfBirth, Email, Gender, Salary, Supervisor_ID, Branch_ID } = req.body;
+  const {
+    FirstName,
+    LastName,
+    DateOfBirth,
+    Email,
+    Gender,
+    Salary,
+    Supervisor_ID,
+    Branch_ID,
+  } = req.body;
 
   try {
     await poolConnect;
@@ -498,6 +603,39 @@ app.put("/service-staffs/:id", async (req, res) => {
   }
 });
 
+///////////////////////////////////
+////////////PROCEDURE/////////////
+
+app.get("/api/service-staff-performance", async (req, res) => {
+  const { branchId, fromDate, endDate, minKpi } = req.query;
+
+  // Validate cơ bản
+  if (!branchId || !fromDate || !endDate) {
+    return res.status(400).json({
+      error: "Vui lòng nhập đầy đủ Branch ID, FromDate và EndDate",
+    });
+  }
+
+  try {
+    await poolConnect;
+
+    const request = pool
+      .request()
+      .input("BranchID", sql.Int, Number(branchId))
+      .input("FromDate", sql.Date, fromDate)
+      .input("EndDate", sql.Date, endDate)
+      .input("MinKPI", sql.Decimal(10, 2), minKpi ? Number(minKpi) : 0);
+
+    const result = await request.execute("Service_Staff_Performance");
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error in GET /api/service-staff-performance:", err);
+    res
+      .status(500)
+      .json({ error: "Lỗi hệ thống khi lấy dữ liệu performance." });
+  }
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
