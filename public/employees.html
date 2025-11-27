@@ -198,8 +198,33 @@
             <label>Citizen_ID
                 <input type="number" id="manager-citizenId" name="manager-citizenId" required />
             </label>
+            <label>First Name
+                <input type="text" id="manager-firstName" name="manager-firstName" required />
+            </label>
+            <label>Last Name
+                <input type="text" id="manager-lastName" name="manager-lastName" required />
+            </label>
+            <label>Date of Birth
+                <input type="date" id="manager-dob" name="manager-dob" required />
+            </label>
+            <label>Email
+                <input type="email" id="manager-email" name="manager-email" required />
+            </label>
+            <label>Gender
+                <input type="text" id="manager-gender" name="manager-gender" required />
+            </label>
+            <label>Branch ID
+                <input type="number" id="manager-branch" name="manager-branch" required />
+            </label>
+            <label>Salary
+                <input type="number" id="manager-salary" name="manager-salary" step="0.01" required />
+            </label>
+            <label>Supervisor ID
+                <input type="number" id="manager-supervisor" name="manager-supervisor" />
+            </label>
 
-            <button type="submit">Add</button>
+
+            <button type="submit">Save</button>
             <button type="button" id="manager-reset">Reset</button>
         </form>
 
@@ -232,8 +257,33 @@
             <label>Citizen_ID
                 <input type="number" id="receptionist-citizenId" name="receptionist-citizenId" required />
             </label>
+            <label>First Name
+                <input type="text" id="receptionist-firstName" name="receptionist-firstName" required />
+            </label>
+            <label>Last Name
+                <input type="text" id="receptionist-lastName" name="receptionist-lastName" required />
+            </label>
+            <label>Date of Birth
+                <input type="date" id="receptionist-dob" name="receptionist-dob" required />
+            </label>
+            <label>Email
+                <input type="email" id="receptionist-email" name="receptionist-email" required />
+            </label>
+            <label>Gender
+                <input type="text" id="receptionist-gender" name="receptionist-gender" maxlength="1" required />
+            </label>
+            <label>Branch ID
+                <input type="number" id="receptionist-branch" name="receptionist-branch" required />
+            </label>
+            <label>Salary
+                <input type="number" id="receptionist-salary" name="receptionist-salary" step="0.01" required />
+            </label>
+            <label>Supervisor ID
+                <input type="number" id="receptionist-supervisor" name="receptionist-supervisor" />
+            </label>
 
-            <button type="submit">Add</button>
+
+            <button type="submit">Save</button>
             <button type="button" id="receptionist-reset">Reset</button>
         </form>
 
@@ -267,8 +317,33 @@
             <label>Citizen_ID
                 <input type="number" id="staff-citizenId" name="staff-citizenId" required />
             </label>
+            <label>First Name
+                <input type="text" id="staff-firstName" name="staff-firstName" required />
+            </label>
+            <label>Last Name
+                <input type="text" id="staff-lastName" name="staff-lastName" required />
+            </label>
+            <label>Date of Birth
+                <input type="date" id="staff-dob" name="staff-dob" required />
+            </label>
+            <label>Email
+                <input type="email" id="staff-email" name="staff-email" required />
+            </label>
+            <label>Gender
+                <input type="text" id="staff-gender" name="staff-gender" maxlength="1" required />
+            </label>
+            <label>Branch ID
+                <input type="number" id="staff-branch" name="staff-branch" required />
+            </label>
+            <label>Salary
+                <input type="number" id="staff-salary" name="staff-salary" step="0.01" required />
+            </label>
+            <label>Supervisor ID
+                <input type="number" id="staff-supervisor" name="staff-supervisor" />
+            </label>
 
-            <button type="submit">Add</button>
+
+            <button type="submit">Save</button>
             <button type="button" id="staff-reset">Reset</button>
         </form>
 
@@ -325,17 +400,16 @@
                     tbody.innerHTML = "";
                     data.forEach(emp => {
                         const tr = document.createElement("tr");
-                        const showEdit = endpoint === "employees";
                         tr.innerHTML = `
-                            <td>${emp.Citizen_ID}</td>
-                            <td>${emp.First_Name} ${emp.Last_Name}</td>
-                            <td>${emp.Branch_ID}</td>
-                            <td>${emp.Salary}</td>
-                            <td>${emp.Supervisor_ID ?? '-'}</td>
-                            <td>
-                                ${showEdit ? `<button data-action="edit" data-id="${emp.Citizen_ID}">Edit</button>` : ""}
-                            </td>
-                        `;
+                    <td>${emp.Citizen_ID}</td>
+                    <td>${emp.First_Name} ${emp.Last_Name}</td>
+                    <td>${emp.Branch_ID}</td>
+                    <td>${emp.Salary}</td>
+                    <td>${emp.Supervisor_ID ?? '-'}</td>
+                    <td>
+                        <button data-action="edit" data-id="${emp.Citizen_ID}">Edit</button>
+                    </td>
+                `;
                         tbody.appendChild(tr);
                     });
                 } catch (err) {
