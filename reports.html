@@ -1,0 +1,342 @@
+<div id="reports-page">
+  <style>
+    #reports-page {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #1a2734;
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.06), rgba(42, 82, 152, 0.08));
+      padding: 10px 5px 30px;
+    }
+
+    #reports-page h1,
+    #reports-page h2 {
+      margin: 0 0 10px;
+    }
+
+    #reports-page .intro {
+      background: #fff;
+      border-radius: 14px;
+      padding: 25px;
+      box-shadow: 0 20px 35px rgba(20, 37, 63, 0.08);
+      margin-bottom: 24px;
+      border: 1px solid rgba(30, 60, 114, 0.08);
+    }
+
+    #reports-page .intro p {
+      margin: 0 0 16px;
+      line-height: 1.5;
+      color: #516072;
+    }
+
+    #reports-page .pill-group {
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #reports-page .pill {
+      background: rgba(30, 60, 114, 0.08);
+      color: #1e3c72;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    #reports-page .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    #reports-page .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 18px 30px rgba(22, 33, 54, 0.08);
+      border: 1px solid rgba(30, 60, 114, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #reports-page .card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #reports-page .card header span {
+      font-size: 13px;
+      color: #74859a;
+    }
+
+    #reports-page form {
+      display: grid;
+      gap: 14px;
+    }
+
+    #reports-page label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    #reports-page input,
+    #reports-page button {
+      border-radius: 10px;
+      border: 1px solid rgba(30, 60, 114, 0.2);
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    #reports-page button {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #reports-page button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(30, 60, 114, 0.2);
+    }
+
+    #reports-page .result-card {
+      border: 1px dashed rgba(30, 60, 114, 0.2);
+      border-radius: 12px;
+      padding: 18px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    #reports-page .result-card p {
+      margin: 0;
+    }
+
+    #reports-page .result-card .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    #reports-page .stat {
+      background: rgba(30, 60, 114, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #reports-page .stat small {
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #516072;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    #reports-page .stat strong {
+      font-size: 18px;
+      color: #1e3c72;
+    }
+
+    #reports-page .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #b54747;
+      background: rgba(181, 71, 71, 0.1);
+      border: 1px solid rgba(181, 71, 71, 0.3);
+    }
+
+    #reports-page .empty-state {
+      color: #718096;
+      font-style: italic;
+    }
+  </style>
+
+  <section class="intro">
+    <h1>Dashboard Báo Cáo</h1>
+    <p>
+      Giao diện dưới đây minh hoạ trực quan cho hai function <strong>fnCustomerTotalSpending</strong> và
+      <strong>fnBranchRevenue</strong> vừa xây dựng trong cơ sở dữ liệu. Nhập tham số bên dưới để chạy function và
+      xem kết quả thời gian thực.
+    </p>
+    <div class="pill-group">
+      <span class="pill">fnCustomerTotalSpending</span>
+      <span class="pill">fnBranchRevenue</span>
+      <span class="pill">Cursor + Loop Logic</span>
+    </div>
+  </section>
+
+  <div class="report-grid">
+    <div class="card">
+      <header>
+        <div>
+          <h2>Chi tiêu khách hàng</h2>
+          <span>Truy vấn từ fnCustomerTotalSpending</span>
+        </div>
+      </header>
+
+      <form id="customer-form">
+        <label>
+          Customer ID *
+          <input type="number" id="customer-id" placeholder="Ví dụ: 100001016" required />
+        </label>
+        <label>
+          Từ ngày
+          <input type="date" id="customer-from" />
+        </label>
+        <label>
+          Đến ngày
+          <input type="date" id="customer-to" />
+        </label>
+        <button type="submit">Tra cứu chi tiêu</button>
+      </form>
+
+      <div class="result-card" id="customer-result">
+        <p class="empty-state">Nhập tham số và nhấn "Tra cứu" để xem tổng chi tiêu.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <header>
+        <div>
+          <h2>Doanh thu chi nhánh</h2>
+          <span>Truy vấn từ fnBranchRevenue</span>
+        </div>
+      </header>
+
+      <form id="branch-form">
+        <label>
+          Branch ID *
+          <input type="number" id="branch-id" placeholder="Ví dụ: 1" required />
+        </label>
+        <label>
+          Bắt đầu *
+          <input type="date" id="branch-start" required />
+        </label>
+        <label>
+          Kết thúc *
+          <input type="date" id="branch-end" required />
+        </label>
+        <button type="submit">Tính doanh thu</button>
+      </form>
+
+      <div class="result-card" id="branch-result">
+        <p class="empty-state">Điền thông tin chi nhánh để xem doanh thu.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const customerForm = document.getElementById("customer-form");
+      const branchForm = document.getElementById("branch-form");
+      const customerResult = document.getElementById("customer-result");
+      const branchResult = document.getElementById("branch-result");
+
+      function formatCurrency(value) {
+        return (typeof value === "number" ? value : Number(value || 0)).toLocaleString("vi-VN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }) + " USD";
+      }
+
+      function renderResult(container, payload, meta) {
+        const { title, subtitle } = meta;
+        const info = `
+          <p><strong>${title}</strong></p>
+          <p>${subtitle}</p>
+          <div class="stat-grid">
+            <div class="stat">
+              <small>Tổng phòng</small>
+              <strong>${formatCurrency(payload.TotalRoomCharge ?? payload.TotalRoomRevenue ?? 0)}</strong>
+            </div>
+            <div class="stat">
+              <small>Tổng dịch vụ</small>
+              <strong>${formatCurrency(payload.TotalServiceCharge ?? payload.TotalServiceRevenue ?? 0)}</strong>
+            </div>
+            <div class="stat">
+              <small>Tổng cộng</small>
+              <strong>${formatCurrency(payload.TotalSpending ?? payload.TotalRevenue ?? 0)}</strong>
+            </div>
+          </div>
+        `;
+        container.innerHTML = info;
+      }
+
+      function renderError(container, message) {
+        container.innerHTML = `<div class="alert">${message}</div>`;
+      }
+
+      function formatDateForLabel(value) {
+        if (!value) return "Không giới hạn";
+        try {
+          return new Date(value).toLocaleDateString("vi-VN");
+        } catch {
+          return value;
+        }
+      }
+
+      customerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const customerId = customerForm.querySelector("#customer-id").value.trim();
+        const fromDate = customerForm.querySelector("#customer-from").value;
+        const toDate = customerForm.querySelector("#customer-to").value;
+
+        const params = new URLSearchParams({ customerId });
+        if (fromDate) params.append("fromDate", fromDate);
+        if (toDate) params.append("toDate", toDate);
+
+        customerResult.innerHTML = "<p>Đang tính toán...</p>";
+
+        try {
+          const res = await fetch(`/reports/customer-spending?${params.toString()}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Không thể lấy dữ liệu");
+
+          renderResult(customerResult, data, {
+            title: `Khách hàng #${data.Customer_ID}`,
+            subtitle: `Khoảng thời gian: ${formatDateForLabel(data.FromDate)} → ${formatDateForLabel(data.ToDate)}`
+          });
+        } catch (err) {
+          renderError(customerResult, err.message);
+        }
+      });
+
+      branchForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const branchId = branchForm.querySelector("#branch-id").value.trim();
+        const startDate = branchForm.querySelector("#branch-start").value;
+        const endDate = branchForm.querySelector("#branch-end").value;
+
+        const params = new URLSearchParams({ branchId, startDate, endDate });
+
+        branchResult.innerHTML = "<p>Đang tính toán...</p>";
+
+        try {
+          const res = await fetch(`/reports/branch-revenue?${params.toString()}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Không thể lấy dữ liệu");
+
+          renderResult(branchResult, data, {
+            title: `Chi nhánh #${data.Branch_ID}`,
+            subtitle: `Khoảng thời gian: ${formatDateForLabel(data.StartDate)} → ${formatDateForLabel(data.EndDate)}`
+          });
+        } catch (err) {
+          renderError(branchResult, err.message);
+        }
+      });
+    })();
+  </script>
+</div>
+

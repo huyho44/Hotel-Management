@@ -1288,6 +1288,234 @@ GO
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
+-- REPORTING FUNCTIONS (LOOP-BASED CALCULATIONS) --
+-----------------------------------------------------------------------------------
+GO
+CREATE OR ALTER FUNCTION fnCustomerTotalSpending
+(
+    @CustomerID INT,
+    @FromDate DATE = NULL,
+    @ToDate DATE = NULL
+)
+RETURNS @Result TABLE
+(
+    Customer_ID INT,
+    FromDate DATE,
+    ToDate DATE,
+    TotalRoomCharge DECIMAL(18,2),
+    TotalServiceCharge DECIMAL(18,2),
+    TotalSpending DECIMAL(18,2)
+)
+AS
+BEGIN
+    IF @CustomerID IS NULL OR @CustomerID <= 0 RETURN;
+    IF NOT EXISTS (SELECT 1 FROM Customer WHERE Citizen_ID = @CustomerID) RETURN;
+
+    IF @FromDate IS NULL SET @FromDate = '1900-01-01';
+    IF @ToDate IS NULL SET @ToDate = '9999-12-31';
+    IF @FromDate > @ToDate RETURN;
+
+    DECLARE @Bookings TABLE
+    (
+        RowNum INT IDENTITY(1,1),
+        Booking_ID INT,
+        CheckIn DATE,
+        CheckOut DATE
+    );
+
+    INSERT INTO @Bookings (Booking_ID, CheckIn, CheckOut)
+    SELECT b.Booking_ID, b.CheckIn, b.CheckOut
+    FROM Booking b
+    WHERE b.Customer_Citizen_ID = @CustomerID
+      AND b.CheckIn >= @FromDate
+      AND b.CheckOut <= @ToDate;
+
+    DECLARE 
+        @MaxRow INT = (SELECT COUNT(*) FROM @Bookings),
+        @Idx INT = 1,
+        @BookingID INT,
+        @CheckIn DATE,
+        @CheckOut DATE,
+        @Nights INT,
+        @RoomCharge DECIMAL(18,2),
+        @ServiceCharge DECIMAL(18,2),
+        @TotalRoom DECIMAL(18,2) = 0,
+        @TotalService DECIMAL(18,2) = 0;
+
+    WHILE @Idx <= @MaxRow
+    BEGIN
+        SELECT 
+            @BookingID = Booking_ID,
+            @CheckIn = CheckIn,
+            @CheckOut = CheckOut
+        FROM @Bookings
+        WHERE RowNum = @Idx;
+
+        SET @Nights = DATEDIFF(DAY, @CheckIn, @CheckOut);
+        IF @Nights <= 0 SET @Nights = 1;
+
+        SELECT @RoomCharge = COALESCE(SUM(
+            CASE rt.Price_Level
+                WHEN 'Low' THEN 80.00
+                WHEN 'Medium' THEN 120.00
+                WHEN 'High' THEN 200.00
+                ELSE 100.00
+            END * @Nights
+        ), 0)
+        FROM Consist c
+        JOIN Room r ON c.Room_No = r.Room_No AND c.Branch_ID = r.Branch_ID
+        JOIN Room_Type rt ON r.Room_Type_ID = rt.Room_Type_ID
+        WHERE c.Booking_ID = @BookingID;
+
+        SELECT @ServiceCharge = COALESCE(SUM(
+            req.Number_of_times * COALESCE(ads.Price, la.Default_Price, fb.Price, 0)
+        ), 0)
+        FROM Require req
+        LEFT JOIN (
+            SELECT Service_Type_ID, MIN(Price) AS Price
+            FROM Additional_Service
+            GROUP BY Service_Type_ID
+        ) ads ON ads.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Laundry la ON la.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Food_Beverage fb ON fb.Service_Type_ID = req.Service_Type_ID
+        WHERE req.Booking_ID = @BookingID;
+
+        SET @TotalRoom += COALESCE(@RoomCharge, 0);
+        SET @TotalService += COALESCE(@ServiceCharge, 0);
+
+        SET @Idx += 1;
+    END;
+
+    INSERT INTO @Result
+    SELECT
+        @CustomerID,
+        @FromDate,
+        @ToDate,
+        @TotalRoom,
+        @TotalService,
+        (@TotalRoom + @TotalService);
+
+    RETURN;
+END;
+GO
+
+CREATE OR ALTER FUNCTION fnBranchRevenue
+(
+    @BranchID INT,
+    @StartDate DATE,
+    @EndDate DATE
+)
+RETURNS @Result TABLE
+(
+    Branch_ID INT,
+    StartDate DATE,
+    EndDate DATE,
+    TotalRoomRevenue DECIMAL(18,2),
+    TotalServiceRevenue DECIMAL(18,2),
+    TotalRevenue DECIMAL(18,2)
+)
+AS
+BEGIN
+    IF @BranchID IS NULL OR @BranchID <= 0 RETURN;
+    IF NOT EXISTS (SELECT 1 FROM Branch WHERE Branch_ID = @BranchID) RETURN;
+    IF @StartDate IS NULL OR @EndDate IS NULL RETURN;
+    IF @StartDate > @EndDate RETURN;
+
+    DECLARE @Bookings TABLE
+    (
+        RowNum INT IDENTITY(1,1),
+        Booking_ID INT,
+        CheckIn DATE,
+        CheckOut DATE
+    );
+
+    INSERT INTO @Bookings (Booking_ID, CheckIn, CheckOut)
+    SELECT DISTINCT b.Booking_ID, b.CheckIn, b.CheckOut
+    FROM Booking b
+    JOIN Consist c ON b.Booking_ID = c.Booking_ID
+    WHERE c.Branch_ID = @BranchID
+      AND b.CheckIn >= @StartDate
+      AND b.CheckOut <= @EndDate;
+
+    DECLARE 
+        @MaxRow INT = (SELECT COUNT(*) FROM @Bookings),
+        @Idx INT = 1,
+        @BookingID INT,
+        @CheckIn DATE,
+        @CheckOut DATE,
+        @Nights INT,
+        @RoomCharge DECIMAL(18,2),
+        @ServiceCharge DECIMAL(18,2),
+        @TotalRoom DECIMAL(18,2) = 0,
+        @TotalService DECIMAL(18,2) = 0;
+
+    WHILE @Idx <= @MaxRow
+    BEGIN
+        SELECT 
+            @BookingID = Booking_ID,
+            @CheckIn = CheckIn,
+            @CheckOut = CheckOut
+        FROM @Bookings
+        WHERE RowNum = @Idx;
+
+        SET @Nights = DATEDIFF(DAY, @CheckIn, @CheckOut);
+        IF @Nights <= 0 SET @Nights = 1;
+
+        SELECT @RoomCharge = COALESCE(SUM(
+            CASE rt.Price_Level
+                WHEN 'Low' THEN 80.00
+                WHEN 'Medium' THEN 120.00
+                WHEN 'High' THEN 200.00
+                ELSE 100.00
+            END * @Nights
+        ), 0)
+        FROM Consist c
+        JOIN Room r ON c.Room_No = r.Room_No AND c.Branch_ID = r.Branch_ID
+        JOIN Room_Type rt ON r.Room_Type_ID = rt.Room_Type_ID
+        WHERE c.Booking_ID = @BookingID
+          AND c.Branch_ID = @BranchID;
+
+        SELECT @ServiceCharge = COALESCE(SUM(
+            req.Number_of_times * COALESCE(ads.Price, la.Default_Price, fb.Price, 0)
+        ), 0)
+        FROM Require req
+        LEFT JOIN (
+            SELECT Service_Type_ID, MIN(Price) AS Price
+            FROM Additional_Service
+            GROUP BY Service_Type_ID
+        ) ads ON ads.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Laundry la ON la.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Food_Beverage fb ON fb.Service_Type_ID = req.Service_Type_ID
+        WHERE req.Booking_ID = @BookingID;
+
+        SET @TotalRoom += COALESCE(@RoomCharge, 0);
+        SET @TotalService += COALESCE(@ServiceCharge, 0);
+
+        SET @Idx += 1;
+    END;
+
+    INSERT INTO @Result
+    SELECT
+        @BranchID,
+        @StartDate,
+        @EndDate,
+        @TotalRoom,
+        @TotalService,
+        (@TotalRoom + @TotalService);
+
+    RETURN;
+END;
+GO
+
+-----------------------------------------------------------------------------------
+-- DEMO CALLS FOR REPORTING PROCEDURES (UNCOMMENT WHEN PRESENTING) --
+-----------------------------------------------------------------------------------
+-- SELECT * FROM fnCustomerTotalSpending (100001016, '2025-01-01', '2025-12-31');
+-- SELECT * FROM fnBranchRevenue (1, '2025-01-01', '2025-12-31');
+-----------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
 -- DERIVED ATTRIBUTE CALCULATIONS --
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
@@ -1768,3 +1996,4 @@ INSERT INTO Require (Booking_ID, Service_Type_ID, Number_of_times) VALUES
 (3, 7,  3),  
 (4, 2,  1),  
 (5, 10, 2);  
+
