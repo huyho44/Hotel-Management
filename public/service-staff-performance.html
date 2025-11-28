@@ -4,15 +4,21 @@
     <meta charset="UTF-8" />
     <title>Service Staff Performance</title>
     <style>
-      body {
+      /* body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
         margin: 0;
         padding: 20px;
         background: #f4f6fb;
-      }
+      }*/
       h1 {
         margin-bottom: 10px;
+      }
+      .service-page {
+        padding: 20px;
+        background: #f4f6fb;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
       }
       .filter-panel,
       .top-actions {
@@ -137,279 +143,283 @@
     </style>
   </head>
   <body>
-    <h1>Service Staff Performance</h1>
+    <div class="service-page">
+      <h1>Service Staff Performance</h1>
 
-    <div id="message"></div>
+      <div id="message"></div>
 
-    <!-- Bộ filter gọi stored procedure -->
-    <div class="filter-panel">
-      <div>
-        <label>Branch ID:</label>
-        <input type="number" id="branchId" value="1" min="1" />
+      <!-- Bộ filter gọi stored procedure -->
+      <div class="filter-panel">
+        <div>
+          <label>Branch ID:</label>
+          <input type="number" id="branchId" value="1" min="1" />
+        </div>
+        <div>
+          <label>From date:</label>
+          <input type="date" id="fromDate" />
+        </div>
+        <div>
+          <label>End date:</label>
+          <input type="date" id="endDate" />
+        </div>
+        <div>
+          <label>Min KPI:</label>
+          <input type="number" id="minKpi" value="0" min="0" />
+        </div>
+        <button class="primary" id="btnLoad">Load dữ liệu</button>
       </div>
-      <div>
-        <label>From date:</label>
-        <input type="date" id="fromDate" />
+
+      <div class="top-actions">
+        <div>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by ID or name..."
+          />
+        </div>
+        <button class="secondary" id="btnCreate">
+          + Create New Service Staff
+        </button>
+        <button class="secondary" id="btnEdit" disabled>
+          Update Employee Info
+        </button>
+        <button class="danger" id="btnDelete" disabled>Delete Employee</button>
       </div>
-      <div>
-        <label>End date:</label>
-        <input type="date" id="endDate" />
-      </div>
-      <div>
-        <label>Min KPI:</label>
-        <input type="number" id="minKpi" value="0" min="0" />
-      </div>
-      <button class="primary" id="btnLoad">Load dữ liệu</button>
-    </div>
 
-    <div class="top-actions">
-      <div>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search by ID or name..."
-        />
-      </div>
-      <button class="secondary" id="btnCreate">
-        + Create New Service Staff
-      </button>
-      <button class="secondary" id="btnEdit" disabled>
-        Update Employee Info
-      </button>
-      <button class="danger" id="btnDelete" disabled>Delete Employee</button>
-    </div>
+      <table id="staffTable">
+        <thead>
+          <tr>
+            <th data-field="Citizen_ID">Citizen ID ▲▼</th>
+            <th data-field="Full_Name">Full name ▲▼</th>
+            <th data-field="Branch_ID">Branch ▲▼</th>
+            <th data-field="Total_Performed">Total performed ▲▼</th>
+            <th data-field="Total_Revenue">Total revenue ▲▼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data rows -->
+        </tbody>
+      </table>
 
-    <table id="staffTable">
-      <thead>
-        <tr>
-          <th data-field="Citizen_ID">Citizen ID ▲▼</th>
-          <th data-field="Full_Name">Full name ▲▼</th>
-          <th data-field="Branch_ID">Branch ▲▼</th>
-          <th data-field="Total_Performed">Total performed ▲▼</th>
-          <th data-field="Total_Revenue">Total revenue ▲▼</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data rows -->
-      </tbody>
-    </table>
+      <!-- Modal update -->
+      <div class="modal-backdrop" id="editModalBackdrop">
+        <div class="modal">
+          <h2>Update Employee Information</h2>
 
-    <!-- Modal update -->
-    <div class="modal-backdrop" id="editModalBackdrop">
-      <div class="modal">
-        <h2>Update Employee Information</h2>
+          <div class="field">
+            <label>Citizen ID (read-only)</label>
+            <input type="text" id="editCitizenId" readonly />
+          </div>
 
-        <div class="field">
-          <label>Citizen ID (read-only)</label>
-          <input type="text" id="editCitizenId" readonly />
-        </div>
+          <div class="field">
+            <label>First name</label>
+            <input type="text" id="editFirstName" />
+          </div>
 
-        <div class="field">
-          <label>First name</label>
-          <input type="text" id="editFirstName" />
-        </div>
+          <div class="field">
+            <label>Last name</label>
+            <input type="text" id="editLastName" />
+          </div>
 
-        <div class="field">
-          <label>Last name</label>
-          <input type="text" id="editLastName" />
-        </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="editEmail" />
+          </div>
 
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="editEmail" />
-        </div>
+          <div class="field">
+            <label>Gender</label>
+            <select id="editGender">
+              <option value="">-- Select Gender --</option>
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+              <option value="O">Other (O)</option>
+            </select>
+          </div>
 
-        <div class="field">
-          <label>Gender</label>
-          <select id="editGender">
-            <option value="">-- Select Gender --</option>
-            <option value="M">Male (M)</option>
-            <option value="F">Female (F)</option>
-            <option value="O">Other (O)</option>
-          </select>
-        </div>
+          <div class="field">
+            <label>Supervisor ID</label>
+            <input type="number" id="editSupervisorId" min="1" />
+          </div>
 
-        <div class="field">
-          <label>Supervisor ID</label>
-          <input type="number" id="editSupervisorId" min="1" />
-        </div>
+          <div class="field">
+            <label>Branch ID</label>
+            <input type="number" id="editBranchId" min="1" />
+          </div>
 
-        <div class="field">
-          <label>Branch ID</label>
-          <input type="number" id="editBranchId" min="1" />
-        </div>
+          <div class="field">
+            <label>Salary</label>
+            <input type="number" id="editSalary" min="0" step="0.01" />
+          </div>
 
-        <div class="field">
-          <label>Salary</label>
-          <input type="number" id="editSalary" min="0" step="0.01" />
-        </div>
-
-        <div class="modal-footer">
-          <button class="secondary" id="btnCancelEdit">Hủy</button>
-          <button class="primary" id="btnSaveEdit">Lưu</button>
+          <div class="modal-footer">
+            <button class="secondary" id="btnCancelEdit">Hủy</button>
+            <button class="primary" id="btnSaveEdit">Lưu</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <script>
-      const tbody = document.querySelector("#staffTable tbody");
-      const messageBox = document.getElementById("message");
-      const btnLoad = document.getElementById("btnLoad");
-      const btnCreate = document.getElementById("btnCreate");
-      const btnEdit = document.getElementById("btnEdit");
-      const btnDelete = document.getElementById("btnDelete");
-      const searchInput = document.getElementById("searchInput");
+      <script>
+        const tbody = document.querySelector("#staffTable tbody");
+        const messageBox = document.getElementById("message");
+        const btnLoad = document.getElementById("btnLoad");
+        const btnCreate = document.getElementById("btnCreate");
+        const btnEdit = document.getElementById("btnEdit");
+        const btnDelete = document.getElementById("btnDelete");
+        const searchInput = document.getElementById("searchInput");
 
-      const editModalBackdrop = document.getElementById("editModalBackdrop");
-      const editCitizenId = document.getElementById("editCitizenId");
-      const editFirstName = document.getElementById("editFirstName");
-      const editLastName = document.getElementById("editLastName");
-      const editEmail = document.getElementById("editEmail");
-      const editSalary = document.getElementById("editSalary");
-      const editGender = document.getElementById("editGender");
-      const editSupervisorId = document.getElementById("editSupervisorId");
-      const editBranchId = document.getElementById("editBranchId");
+        const editModalBackdrop = document.getElementById("editModalBackdrop");
+        const editCitizenId = document.getElementById("editCitizenId");
+        const editFirstName = document.getElementById("editFirstName");
+        const editLastName = document.getElementById("editLastName");
+        const editEmail = document.getElementById("editEmail");
+        const editSalary = document.getElementById("editSalary");
+        const editGender = document.getElementById("editGender");
+        const editSupervisorId = document.getElementById("editSupervisorId");
+        const editBranchId = document.getElementById("editBranchId");
 
-      const btnCancelEdit = document.getElementById("btnCancelEdit");
-      const btnSaveEdit = document.getElementById("btnSaveEdit");
+        const btnCancelEdit = document.getElementById("btnCancelEdit");
+        const btnSaveEdit = document.getElementById("btnSaveEdit");
 
-      let allRows = []; // dữ liệu gốc từ API
-      let currentSelected = null; // object row đang chọn
-      let currentSort = { field: null, asc: true };
+        let allRows = []; // dữ liệu gốc từ API
+        let currentSelected = null; // object row đang chọn
+        let currentSort = { field: null, asc: true };
 
-      function showMessage(text, type = "error") {
-        if (!text) {
-          messageBox.style.display = "none";
-          return;
-        }
-        messageBox.textContent = text;
-        messageBox.className = "";
-        messageBox.classList.add(type === "success" ? "success" : "error");
-        messageBox.id = "message";
-        messageBox.style.display = "block";
-      }
-
-      function validateFilter() {
-        const branchId = document.getElementById("branchId").value;
-        const fromDate = document.getElementById("fromDate").value;
-        const endDate = document.getElementById("endDate").value;
-
-        if (!branchId || branchId <= 0) {
-          showMessage("Branch ID must be a positive number.", "error");
-          return false;
-        }
-        if (!fromDate || !endDate) {
-          showMessage("Please select both From date and End date.", "error");
-          return false;
-        }
-        if (fromDate > endDate) {
-          showMessage("From date must not be greater than End date.", "error");
-          return false;
-        }
-        return true;
-      }
-
-      async function loadData() {
-        if (!validateFilter()) return;
-
-        showMessage(""); // clear
-        tbody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
-
-        const branchId = document.getElementById("branchId").value;
-        const fromDate = document.getElementById("fromDate").value;
-        const endDate = document.getElementById("endDate").value;
-        const minKpi = document.getElementById("minKpi").value || 0;
-
-        const params = new URLSearchParams({
-          branchId,
-          fromDate,
-          endDate,
-          minKpi,
-        });
-
-        try {
-          const res = await fetch(
-            `/api/service-staff-performance?${params.toString()}`
-          );
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || "Error loading data.");
+        function showMessage(text, type = "error") {
+          if (!text) {
+            messageBox.style.display = "none";
+            return;
           }
-
-          const data = await res.json();
-          console.log("🔹 raw data from API:", data);
-
-          // Đảm bảo giữ nguyên mọi field, và ép 2 field này về number cho chắc
-          allRows = data.map((r) => ({
-            ...r,
-            Total_Performed:
-              r.Total_Performed != null ? Number(r.Total_Performed) : null,
-            Total_Revenue:
-              r.Total_Revenue != null ? Number(r.Total_Revenue) : null,
-          }));
-
-          console.log("🔹 allRows after mapping:", allRows);
-
-          currentSelected = null;
-          renderTable();
-          showMessage(`Loaded ${data.length} rows of data.`, "success");
-        } catch (e) {
-          console.error(e);
-          tbody.innerHTML = "";
-          showMessage(e.message, "error");
+          messageBox.textContent = text;
+          messageBox.className = "";
+          messageBox.classList.add(type === "success" ? "success" : "error");
+          messageBox.id = "message";
+          messageBox.style.display = "block";
         }
-        updateActionButtons();
-      }
 
-      function renderTable() {
-        const keyword = searchInput.value.trim().toLowerCase();
-        let rows = [...allRows];
+        function validateFilter() {
+          const branchId = document.getElementById("branchId").value;
+          const fromDate = document.getElementById("fromDate").value;
+          const endDate = document.getElementById("endDate").value;
 
-        // Filter bằng search (ID hoặc Full_Name)
-        if (keyword) {
-          rows = rows.filter((r) => {
-            const idStr = String(r.Citizen_ID || "");
-            const nameStr = String(r.Full_Name || "").toLowerCase();
-            return idStr.includes(keyword) || nameStr.includes(keyword);
+          if (!branchId || branchId <= 0) {
+            showMessage("Branch ID must be a positive number.", "error");
+            return false;
+          }
+          if (!fromDate || !endDate) {
+            showMessage("Please select both From date and End date.", "error");
+            return false;
+          }
+          if (fromDate > endDate) {
+            showMessage(
+              "From date must not be greater than End date.",
+              "error"
+            );
+            return false;
+          }
+          return true;
+        }
+
+        async function loadData() {
+          if (!validateFilter()) return;
+
+          showMessage(""); // clear
+          tbody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+
+          const branchId = document.getElementById("branchId").value;
+          const fromDate = document.getElementById("fromDate").value;
+          const endDate = document.getElementById("endDate").value;
+          const minKpi = document.getElementById("minKpi").value || 0;
+
+          const params = new URLSearchParams({
+            branchId,
+            fromDate,
+            endDate,
+            minKpi,
           });
-        }
 
-        // Sort client-side
-        if (currentSort.field) {
-          const { field, asc } = currentSort;
-          rows.sort((a, b) => {
-            const va = a[field];
-            const vb = b[field];
-            if (va == null && vb != null) return asc ? -1 : 1;
-            if (va != null && vb == null) return asc ? 1 : -1;
-            if (typeof va === "number" && typeof vb === "number") {
-              return asc ? va - vb : vb - va;
+          try {
+            const res = await fetch(
+              `/api/service-staff-performance?${params.toString()}`
+            );
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.error || "Error loading data.");
             }
-            const sa = String(va ?? "").toLowerCase();
-            const sb = String(vb ?? "").toLowerCase();
-            return asc ? sa.localeCompare(sb) : sb.localeCompare(sa);
-          });
+
+            const data = await res.json();
+            console.log("🔹 raw data from API:", data);
+
+            // Đảm bảo giữ nguyên mọi field, và ép 2 field này về number cho chắc
+            allRows = data.map((r) => ({
+              ...r,
+              Total_Performed:
+                r.Total_Performed != null ? Number(r.Total_Performed) : null,
+              Total_Revenue:
+                r.Total_Revenue != null ? Number(r.Total_Revenue) : null,
+            }));
+
+            console.log("🔹 allRows after mapping:", allRows);
+
+            currentSelected = null;
+            renderTable();
+            showMessage(`Loaded ${data.length} rows of data.`, "success");
+          } catch (e) {
+            console.error(e);
+            tbody.innerHTML = "";
+            showMessage(e.message, "error");
+          }
+          updateActionButtons();
         }
 
-        tbody.innerHTML = "";
-        if (rows.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='5'>No data available</td></tr>";
-          return;
-        }
+        function renderTable() {
+          const keyword = searchInput.value.trim().toLowerCase();
+          let rows = [...allRows];
 
-        rows.forEach((row) => {
-          console.log("🔹 render row:", row);
-
-          const tr = document.createElement("tr");
-
-          if (
-            currentSelected &&
-            currentSelected.Citizen_ID === row.Citizen_ID
-          ) {
-            tr.classList.add("selected");
+          // Filter bằng search (ID hoặc Full_Name)
+          if (keyword) {
+            rows = rows.filter((r) => {
+              const idStr = String(r.Citizen_ID || "");
+              const nameStr = String(r.Full_Name || "").toLowerCase();
+              return idStr.includes(keyword) || nameStr.includes(keyword);
+            });
           }
 
-          tr.innerHTML = `
+          // Sort client-side
+          if (currentSort.field) {
+            const { field, asc } = currentSort;
+            rows.sort((a, b) => {
+              const va = a[field];
+              const vb = b[field];
+              if (va == null && vb != null) return asc ? -1 : 1;
+              if (va != null && vb == null) return asc ? 1 : -1;
+              if (typeof va === "number" && typeof vb === "number") {
+                return asc ? va - vb : vb - va;
+              }
+              const sa = String(va ?? "").toLowerCase();
+              const sb = String(vb ?? "").toLowerCase();
+              return asc ? sa.localeCompare(sb) : sb.localeCompare(sa);
+            });
+          }
+
+          tbody.innerHTML = "";
+          if (rows.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>No data available</td></tr>";
+            return;
+          }
+
+          rows.forEach((row) => {
+            console.log("🔹 render row:", row);
+
+            const tr = document.createElement("tr");
+
+            if (
+              currentSelected &&
+              currentSelected.Citizen_ID === row.Citizen_ID
+            ) {
+              tr.classList.add("selected");
+            }
+
+            tr.innerHTML = `
       <td>${row.Citizen_ID}</td>
       <td>${row.Full_Name || ""}</td>
       <td>${row.Branch_ID}</td>
@@ -417,250 +427,288 @@
       <td>${row.Total_Revenue ?? ""}</td>
     `;
 
-          tr.addEventListener("click", () => {
-            if (
-              currentSelected &&
-              currentSelected.Citizen_ID === row.Citizen_ID
-            ) {
-              currentSelected = null;
+            tr.addEventListener("click", () => {
+              if (
+                currentSelected &&
+                currentSelected.Citizen_ID === row.Citizen_ID
+              ) {
+                currentSelected = null;
+              } else {
+                currentSelected = row;
+              }
+              renderTable();
+              updateActionButtons();
+            });
+
+            tbody.appendChild(tr);
+          });
+        }
+
+        function updateActionButtons() {
+          const hasSelection = !!currentSelected;
+          btnEdit.disabled = !hasSelection;
+          btnDelete.disabled = !hasSelection;
+        }
+
+        // Sort khi click header
+        document.querySelectorAll("#staffTable thead th").forEach((th) => {
+          th.addEventListener("click", () => {
+            const field = th.dataset.field;
+            if (!field) return;
+            if (currentSort.field === field) {
+              currentSort.asc = !currentSort.asc;
             } else {
-              currentSelected = row;
+              currentSort.field = field;
+              currentSort.asc = true;
             }
             renderTable();
-            updateActionButtons();
           });
-
-          tbody.appendChild(tr);
         });
-      }
 
-      function updateActionButtons() {
-        const hasSelection = !!currentSelected;
-        btnEdit.disabled = !hasSelection;
-        btnDelete.disabled = !hasSelection;
-      }
-
-      // Sort khi click header
-      document.querySelectorAll("#staffTable thead th").forEach((th) => {
-        th.addEventListener("click", () => {
-          const field = th.dataset.field;
-          if (!field) return;
-          if (currentSort.field === field) {
-            currentSort.asc = !currentSort.asc;
-          } else {
-            currentSort.field = field;
-            currentSort.asc = true;
-          }
+        // Search realtime
+        searchInput.addEventListener("input", () => {
           renderTable();
         });
-      });
 
-      // Search realtime
-      searchInput.addEventListener("input", () => {
-        renderTable();
-      });
+        // Nút load
+        btnLoad.addEventListener("click", loadData);
 
-      // Nút load
-      btnLoad.addEventListener("click", loadData);
+        // Nút tạo mới (For Create, chuyển hướng sang trang khác)
+        btnCreate.addEventListener("click", () => {
+          window.location.href = "index.html?page=employees.html";
+        });
 
-      // Nút tạo mới (For Create, chuyển hướng sang trang khác)
-      btnCreate.addEventListener("click", () => {
-        window.location.href = "/create-service-staff.html";
-      });
+        // Edit: open modal
 
-      // Edit: open modal
-
-      btnCancelEdit.addEventListener("click", () => {
-        editModalBackdrop.style.display = "none";
-      });
-
-      function validateEditForm() {
-        const firstName = editFirstName.value.trim();
-        const lastName = editLastName.value.trim();
-        const email = editEmail.value.trim();
-        const gender = editGender.value;
-        const supervisorIdStr = editSupervisorId.value.trim();
-        const branchIdStr = editBranchId.value.trim();
-        const salaryStr = editSalary.value.trim();
-
-        if (!firstName || !lastName) {
-          showMessage("First name and Last name are not empty", "error");
-          return false;
-        }
-
-        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          showMessage("Email is not in the correct format.", "error");
-          return false;
-        }
-
-        if (gender && !["M", "F", "O"].includes(gender)) {
-          showMessage("Gender is not valid.", "error");
-          return false;
-        }
-
-        if (supervisorIdStr) {
-          const supId = Number(supervisorIdStr);
-          if (Number.isNaN(supId) || supId <= 0) {
-            showMessage("Supervisor ID must be a positive integer.", "error");
-            return false;
-          }
-        }
-
-        if (!branchIdStr) {
-          showMessage(
-            "Branch ID must not be empty when updating an employee.",
-            "error"
-          );
-          return false;
-        } else {
-          const bid = Number(branchIdStr);
-          if (Number.isNaN(bid) || bid <= 0) {
-            showMessage("Branch ID must be a positive integer.", "error");
-            return false;
-          }
-        }
-
-        if (salaryStr) {
-          const salary = Number(salaryStr);
-          if (Number.isNaN(salary) || salary < 0) {
-            showMessage("Salary must be a non-negative number.", "error");
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      async function openEditModalForCurrentSelection() {
-        if (!currentSelected) return;
-
-        const citizenId = currentSelected.Citizen_ID;
-
-        try {
-          // gọi song song hai API
-          const [humanRes, employeeRes] = await Promise.all([
-            fetch(`/humans/${citizenId}`),
-            fetch(`/employees/${citizenId}`),
-          ]);
-
-          const humanData = await humanRes.json().catch(() => ({}));
-          const empData = await employeeRes.json().catch(() => ({}));
-
-          if (!humanRes.ok) {
-            throw new Error(
-              humanData.error || "Failed to fetch Human information."
-            );
-          }
-          if (!employeeRes.ok) {
-            throw new Error(
-              empData.error || "Failed to fetch Employee information."
-            );
-          }
-
-          const human = Array.isArray(humanData) ? humanData[0] : humanData;
-          const employee = empData;
-
-          if (!human) {
-            throw new Error("Human not found in the Human table.");
-          }
-
-          // fill form
-          editCitizenId.value = human.Citizen_ID;
-          editFirstName.value = human.First_Name || "";
-          editLastName.value = human.Last_Name || "";
-          editEmail.value = human.Email || "";
-
-          editGender.value = human.Gender || "";
-
-          editSupervisorId.value =
-            employee.Supervisor_ID != null ? employee.Supervisor_ID : "";
-          editBranchId.value =
-            employee.Branch_ID != null ? employee.Branch_ID : "";
-          editSalary.value = employee.Salary != null ? employee.Salary : "";
-
-          editModalBackdrop.style.display = "flex";
-        } catch (e) {
-          console.error(e);
-          showMessage(e.message, "error");
-        }
-      }
-      btnEdit.addEventListener("click", () => {
-        openEditModalForCurrentSelection();
-      });
-
-      // Save edit
-      btnSaveEdit.addEventListener("click", async () => {
-        if (!validateEditForm()) return;
-
-        const citizenId = editCitizenId.value;
-        const firstName = editFirstName.value.trim();
-        const lastName = editLastName.value.trim();
-        const email = editEmail.value.trim() || null;
-        const gender = editGender.value || null;
-        const supervisorId = editSupervisorId.value.trim()
-          ? Number(editSupervisorId.value.trim())
-          : null;
-        const branchId = editBranchId.value.trim()
-          ? Number(editBranchId.value.trim())
-          : null;
-        const salary = editSalary.value.trim()
-          ? Number(editSalary.value.trim())
-          : null;
-
-        try {
-          const res = await fetch(`/service-staffs/${citizenId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              FirstName: firstName,
-              LastName: lastName,
-              Email: email,
-              Gender: gender,
-              Salary: salary,
-              Supervisor_ID: supervisorId,
-              Branch_ID: branchId,
-              DateOfBirth: null, // nếu sau này thêm DOB thì fill
-            }),
-          });
-
-          const body = await res.json().catch(() => ({}));
-
-          if (!res.ok) {
-            // show đúng message từ proc
-            throw new Error(body.error || "Error updating Service Staff.");
-          }
-
-          showMessage("Service Staff updated successfully.", "success");
+        btnCancelEdit.addEventListener("click", () => {
           editModalBackdrop.style.display = "none";
+        });
 
-          allRows = allRows.map((r) =>
-            r.Citizen_ID === Number(citizenId)
-              ? {
-                  ...r, // giữ Citizen_ID, Total_Performed, Total_Revenue, ...
-                  Full_Name: `${firstName} ${lastName}`,
-                  Branch_ID: branchId ?? r.Branch_ID,
-                }
-              : r
-          );
+        function validateEditForm() {
+          const firstName = editFirstName.value.trim();
+          const lastName = editLastName.value.trim();
+          const email = editEmail.value.trim();
+          const gender = editGender.value;
+          const supervisorIdStr = editSupervisorId.value.trim();
+          const branchIdStr = editBranchId.value.trim();
+          const salaryStr = editSalary.value.trim();
 
-          renderTable();
-        } catch (e) {
-          console.error(e);
-          showMessage(e.message, "error");
+          if (!firstName || !lastName) {
+            showMessage("First name and Last name are not empty", "error");
+            return false;
+          }
+
+          if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showMessage("Email is not in the correct format.", "error");
+            return false;
+          }
+
+          if (gender && !["M", "F", "O"].includes(gender)) {
+            showMessage("Gender is not valid.", "error");
+            return false;
+          }
+
+          if (supervisorIdStr) {
+            const supId = Number(supervisorIdStr);
+            if (Number.isNaN(supId) || supId <= 0) {
+              showMessage("Supervisor ID must be a positive integer.", "error");
+              return false;
+            }
+          }
+
+          if (!branchIdStr) {
+            showMessage(
+              "Branch ID must not be empty when updating an employee.",
+              "error"
+            );
+            return false;
+          } else {
+            const bid = Number(branchIdStr);
+            if (Number.isNaN(bid) || bid <= 0) {
+              showMessage("Branch ID must be a positive integer.", "error");
+              return false;
+            }
+          }
+
+          if (salaryStr) {
+            const salary = Number(salaryStr);
+            if (Number.isNaN(salary) || salary < 0) {
+              showMessage("Salary must be a non-negative number.", "error");
+              return false;
+            }
+          }
+
+          return true;
         }
-      });
 
-      // Set default date range on load
-      window.addEventListener("load", () => {
-        const today = new Date();
-        const endStr = today.toISOString().slice(0, 10);
-        const past = new Date();
-        past.setDate(today.getDate() - 7);
-        const fromStr = past.toISOString().slice(0, 10);
+        async function openEditModalForCurrentSelection() {
+          if (!currentSelected) return;
 
-        document.getElementById("fromDate").value = fromStr;
-        document.getElementById("endDate").value = endStr;
-      });
-    </script>
+          const citizenId = currentSelected.Citizen_ID;
+
+          try {
+            // gọi song song hai API
+            const [humanRes, employeeRes] = await Promise.all([
+              fetch(`/humans/${citizenId}`),
+              fetch(`/employees/${citizenId}`),
+            ]);
+
+            const humanData = await humanRes.json().catch(() => ({}));
+            const empData = await employeeRes.json().catch(() => ({}));
+
+            if (!humanRes.ok) {
+              throw new Error(
+                humanData.error || "Failed to fetch Human information."
+              );
+            }
+            if (!employeeRes.ok) {
+              throw new Error(
+                empData.error || "Failed to fetch Employee information."
+              );
+            }
+
+            const human = Array.isArray(humanData) ? humanData[0] : humanData;
+            const employee = empData;
+
+            if (!human) {
+              throw new Error("Human not found in the Human table.");
+            }
+
+            // fill form
+            editCitizenId.value = human.Citizen_ID;
+            editFirstName.value = human.First_Name || "";
+            editLastName.value = human.Last_Name || "";
+            editEmail.value = human.Email || "";
+
+            editGender.value = human.Gender || "";
+
+            editSupervisorId.value =
+              employee.Supervisor_ID != null ? employee.Supervisor_ID : "";
+            editBranchId.value =
+              employee.Branch_ID != null ? employee.Branch_ID : "";
+            editSalary.value = employee.Salary != null ? employee.Salary : "";
+
+            editModalBackdrop.style.display = "flex";
+          } catch (e) {
+            console.error(e);
+            showMessage(e.message, "error");
+          }
+        }
+        btnEdit.addEventListener("click", () => {
+          openEditModalForCurrentSelection();
+        });
+
+        // Save edit
+        btnSaveEdit.addEventListener("click", async () => {
+          if (!validateEditForm()) return;
+
+          const citizenId = editCitizenId.value;
+          const firstName = editFirstName.value.trim();
+          const lastName = editLastName.value.trim();
+          const email = editEmail.value.trim() || null;
+          const gender = editGender.value || null;
+          const supervisorId = editSupervisorId.value.trim()
+            ? Number(editSupervisorId.value.trim())
+            : null;
+          const branchId = editBranchId.value.trim()
+            ? Number(editBranchId.value.trim())
+            : null;
+          const salary = editSalary.value.trim()
+            ? Number(editSalary.value.trim())
+            : null;
+
+          try {
+            const res = await fetch(`/service-staffs/${citizenId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                FirstName: firstName,
+                LastName: lastName,
+                Email: email,
+                Gender: gender,
+                Salary: salary,
+                Supervisor_ID: supervisorId,
+                Branch_ID: branchId,
+                DateOfBirth: null, // nếu sau này thêm DOB thì fill
+              }),
+            });
+
+            const body = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+              // show đúng message từ proc
+              throw new Error(body.error || "Error updating Service Staff.");
+            }
+
+            showMessage("Service Staff updated successfully.", "success");
+            editModalBackdrop.style.display = "none";
+
+            allRows = allRows.map((r) =>
+              r.Citizen_ID === Number(citizenId)
+                ? {
+                    ...r, // giữ Citizen_ID, Total_Performed, Total_Revenue, ...
+                    Full_Name: `${firstName} ${lastName}`,
+                    Branch_ID: branchId ?? r.Branch_ID,
+                  }
+                : r
+            );
+
+            renderTable();
+          } catch (e) {
+            console.error(e);
+            showMessage(e.message, "error");
+          }
+        });
+
+        /////DELETE/////
+
+        btnDelete.addEventListener("click", async () => {
+          if (!currentSelected) return;
+          const confirmDelete = confirm(
+            `Are you sure you want to delete staff ${currentSelected.Full_Name} (ID: ${currentSelected.Citizen_ID})?`
+          );
+          if (!confirmDelete) return;
+
+          try {
+            const res = await fetch(
+              `/service-staffs/${currentSelected.Citizen_ID}`,
+              {
+                method: "DELETE",
+              }
+            );
+            const body = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+              throw new Error(body.error || "Error deleting service staff.");
+            }
+
+            showMessage("Service staff deleted successfully.", "success");
+
+            // Remove from current list
+            allRows = allRows.filter(
+              (r) => r.Citizen_ID !== currentSelected.Citizen_ID
+            );
+            currentSelected = null;
+            renderTable();
+            updateActionButtons();
+          } catch (e) {
+            console.error(e);
+            showMessage(e.message, "error");
+          }
+        });
+
+        // Set default date range on load
+        window.addEventListener("load", () => {
+          const today = new Date();
+          const endStr = today.toISOString().slice(0, 10);
+          const past = new Date();
+          past.setDate(today.getDate() - 7);
+          const fromStr = past.toISOString().slice(0, 10);
+
+          document.getElementById("fromDate").value = fromStr;
+          document.getElementById("endDate").value = endStr;
+        });
+      </script>
+    </div>
   </body>
 </html>
