@@ -1,757 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Employees Management</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f9f9f9;
-      }
 
-      h1,
-      h2 {
-        margin-bottom: 10px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Employees Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+    }
 
-      /* Tab Buttons */
-      .tab-buttons {
-        display: flex;
-        gap: 10px;
-        background: #fff;
-        padding: 10px 0;
-        border-bottom: 2px solid #ccc;
-        margin-bottom: 20px;
-      }
+    h1,
+    h2 {
+      margin-bottom: 10px;
+    }
 
-      .tab-buttons button {
-        padding: 8px 16px;
-        border: 1px solid #ccc;
-        background: #f0f0f0;
-        cursor: pointer;
-        font-size: 14px;
-        border-radius: 4px;
-      }
+    /* Tab Buttons */
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      background: #fff;
+      padding: 10px 0;
+      border-bottom: 2px solid #ccc;
+      margin-bottom: 20px;
+    }
 
-      .tab-buttons button.active {
-        background: #d0d0d0;
-        font-weight: bold;
-      }
+    .tab-buttons button {
+      padding: 8px 16px;
+      border: 1px solid #ccc;
+      background: #f0f0f0;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+    }
 
-      /* Tab Content */
-      .tab-content {
-        display: none;
-      }
+    .tab-buttons button.active {
+      background: #d0d0d0;
+      font-weight: bold;
+    }
 
-      .tab-content.active {
-        display: block;
-      }
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
 
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-        background: #fff;
-      }
+    .tab-content.active {
+      display: block;
+    }
 
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background: #fff;
+    }
 
-      th {
-        background-color: #f0f0f0;
-      }
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
 
-      form.employee-form {
-        margin-bottom: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: flex-end;
-        background: #fff;
-        padding: 15px;
-        border-radius: 4px;
-      }
+    th {
+      background-color: #f0f0f0;
+    }
 
-      form.employee-form label {
-        display: flex;
-        flex-direction: column;
-        font-size: 14px;
-      }
+    form.employee-form {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+      background: #fff;
+      padding: 15px;
+      border-radius: 4px;
+    }
 
-      form.employee-form input {
-        padding: 4px 6px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-      }
+    form.employee-form label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
 
-      form.employee-form button {
-        padding: 6px 10px;
-        cursor: pointer;
-        border: 1px solid #888;
-        background: #f0f0f0;
-        border-radius: 4px;
-      }
+    form.employee-form input {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
 
-      form.employee-form button:hover {
-        background: #e0e0e0;
-        cursor: pointer;
-      }
+    form.employee-form button {
+      padding: 6px 10px;
+      cursor: pointer;
+      border: 1px solid #888;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
 
-      .message {
-        margin-top: 10px;
-      }
+    form.employee-form button:hover {
+      background: #e0e0e0;
+      cursor: pointer;
+    }
 
-      .message.error {
-        color: red;
-      }
+    .message {
+      margin-top: 10px;
+    }
 
-      .message.success {
-        color: green;
-      }
-    </style>
-  </head>
+    .message.error {
+      color: red;
+    }
 
-  <body>
-    <!-- Tabs -->
-    <div class="tab-buttons">
-      <button class="tab-btn active" data-target="employeeTab">All</button>
-      <button class="tab-btn" data-target="managerTab">Manager</button>
-      <button class="tab-btn" data-target="receptionistTab">
-        Receptionist
-      </button>
-      <button class="tab-btn" data-target="staffTab">Service Staff</button>
-    </div>
+    .message.success {
+      color: green;
+    }
+  </style>
+</head>
 
-    <!-- EMPLOYEE TAB -->
-    <div id="employeeTab" class="tab-content active">
-      <h2>Insert/Update Employee</h2>
+<body>
+  <!-- Tabs -->
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-target="employeeTab">All</button>
+    <button class="tab-btn" data-target="managerTab">Manager</button>
+    <button class="tab-btn" data-target="receptionistTab">
+      Receptionist
+    </button>
+    <button class="tab-btn" data-target="staffTab">Service Staff</button>
+  </div>
 
-      <form id="employee-form" class="employee-form">
-        <input type="hidden" id="employee-mode" value="create" />
-        <input type="hidden" id="employee-editId" />
+  <!-- EMPLOYEE TAB -->
+  <div id="employeeTab" class="tab-content active">
+    <h2>Insert/Update Employee</h2>
 
-        <label
-          >Citizen_ID
-          <input
-            type="number"
-            id="employee-citizenId"
-            name="employee-citizenId"
-            required
-          />
-        </label>
-        <label
-          >First Name
-          <input
-            type="text"
-            id="employee-firstName"
-            name="employee-firstName"
-            required
-          />
-        </label>
-        <label
-          >Last Name
-          <input
-            type="text"
-            id="employee-lastName"
-            name="employee-lastName"
-            required
-          />
-        </label>
-        <label
-          >Date of Birth
-          <input type="date" id="employee-dob" name="employee-dob" required />
-        </label>
-        <label
-          >Email
-          <input
-            type="email"
-            id="employee-email"
-            name="employee-email"
-            required
-          />
-        </label>
-        <label
-          >Gender
-          <input
-            type="text"
-            id="employee-gender"
-            name="employee-gender"
-            required
-          />
-        </label>
-        <label
-          >Branch ID
-          <input
-            type="number"
-            id="employee-branch"
-            name="employee-branch"
-            required
-          />
-        </label>
-        <label
-          >Salary
-          <input
-            type="number"
-            id="employee-salary"
-            name="employee-salary"
-            step="0.01"
-            required
-          />
-        </label>
-        <label
-          >Supervisor ID
-          <input
-            type="number"
-            id="employee-supervisor"
-            name="employee-supervisor"
-          />
-        </label>
+    <form id="employee-form" class="employee-form">
+      <input type="hidden" id="employee-mode" value="create" />
+      <input type="hidden" id="employee-editId" />
 
-        <button type="submit">Save</button>
-        <button type="button" id="employee-reset">Reset</button>
-      </form>
+      <label>Citizen_ID
+        <input type="number" id="employee-citizenId" name="employee-citizenId" required />
+      </label>
+      <label>First Name
+        <input type="text" id="employee-firstName" name="employee-firstName" required />
+      </label>
+      <label>Last Name
+        <input type="text" id="employee-lastName" name="employee-lastName" required />
+      </label>
+      <label>Date of Birth
+        <input type="date" id="employee-dob" name="employee-dob" required />
+      </label>
+      <label>Email
+        <input type="email" id="employee-email" name="employee-email" required />
+      </label>
+      <label>Gender
+        <input type="text" id="employee-gender" name="employee-gender" required />
+      </label>
+      <label>Branch ID
+        <input type="number" id="employee-branch" name="employee-branch" required />
+      </label>
+      <label>Salary
+        <input type="number" id="employee-salary" name="employee-salary" step="0.01" required />
+      </label>
+      <label>Supervisor ID
+        <input type="number" id="employee-supervisor" name="employee-supervisor" />
+      </label>
 
-      <div id="employee-message" class="message"></div>
+      <button type="submit">Save</button>
+      <button type="button" id="employee-reset">Reset</button>
+    </form>
 
-      <h2>List of Employees</h2>
-      <table id="employeeTable">
-        <thead>
-          <tr>
-            <th>Citizen_ID</th>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Salary</th>
-            <th>Supervisor</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="employee-message" class="message"></div>
 
-    <!-- MANAGER TAB -->
-    <div id="managerTab" class="tab-content">
-      <h2>Insert/Update Manager</h2>
+    <h2>List of Employees</h2>
+    <table id="employeeTable">
+      <thead>
+        <tr>
+          <th>Citizen_ID</th>
+          <th>Name</th>
+          <th>Branch</th>
+          <th>Salary</th>
+          <th>Supervisor</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-      <form id="manager-form" class="employee-form">
-        <input type="hidden" id="manager-mode" value="create" />
-        <input type="hidden" id="manager-editId" />
+  <!-- MANAGER TAB -->
+  <div id="managerTab" class="tab-content">
+    <h2>Insert/Update Manager</h2>
 
-        <label
-          >Citizen_ID
-          <input
-            type="number"
-            id="manager-citizenId"
-            name="manager-citizenId"
-            required
-          />
-        </label>
-        <label
-          >First Name
-          <input
-            type="text"
-            id="manager-firstName"
-            name="manager-firstName"
-            required
-          />
-        </label>
-        <label
-          >Last Name
-          <input
-            type="text"
-            id="manager-lastName"
-            name="manager-lastName"
-            required
-          />
-        </label>
-        <label
-          >Date of Birth
-          <input type="date" id="manager-dob" name="manager-dob" required />
-        </label>
-        <label
-          >Email
-          <input
-            type="email"
-            id="manager-email"
-            name="manager-email"
-            required
-          />
-        </label>
-        <label
-          >Gender
-          <input
-            type="text"
-            id="manager-gender"
-            name="manager-gender"
-            required
-          />
-        </label>
-        <label
-          >Branch ID
-          <input
-            type="number"
-            id="manager-branch"
-            name="manager-branch"
-            required
-          />
-        </label>
-        <label
-          >Salary
-          <input
-            type="number"
-            id="manager-salary"
-            name="manager-salary"
-            step="0.01"
-            required
-          />
-        </label>
-        <label
-          >Supervisor ID
-          <input
-            type="number"
-            id="manager-supervisor"
-            name="manager-supervisor"
-          />
-        </label>
+    <form id="manager-form" class="employee-form">
+      <input type="hidden" id="manager-mode" value="create" />
+      <input type="hidden" id="manager-editId" />
 
-        <button type="submit">Save</button>
-        <button type="button" id="manager-reset">Reset</button>
-      </form>
+      <label>Citizen_ID
+        <input type="number" id="manager-citizenId" name="manager-citizenId" required />
+      </label>
+      <label>First Name
+        <input type="text" id="manager-firstName" name="manager-firstName" required />
+      </label>
+      <label>Last Name
+        <input type="text" id="manager-lastName" name="manager-lastName" required />
+      </label>
+      <label>Date of Birth
+        <input type="date" id="manager-dob" name="manager-dob" required />
+      </label>
+      <label>Email
+        <input type="email" id="manager-email" name="manager-email" required />
+      </label>
+      <label>Gender
+        <input type="text" id="manager-gender" name="manager-gender" required />
+      </label>
+      <label>Branch ID
+        <input type="number" id="manager-branch" name="manager-branch" required />
+      </label>
+      <label>Salary
+        <input type="number" id="manager-salary" name="manager-salary" step="0.01" required />
+      </label>
+      <label>Supervisor ID
+        <input type="number" id="manager-supervisor" name="manager-supervisor" />
+      </label>
 
-      <div id="manager-message" class="message"></div>
+      <button type="submit">Save</button>
+      <button type="button" id="manager-reset">Reset</button>
+    </form>
 
-      <h2>List of Managers</h2>
-      <table id="managerTable">
-        <thead>
-          <tr>
-            <th>Citizen_ID</th>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Salary</th>
-            <th>Supervisor</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="manager-message" class="message"></div>
 
-    <!-- RECEPTIONIST TAB -->
-    <div id="receptionistTab" class="tab-content">
-      <h2>Insert/Update Receptionists</h2>
+    <h2>List of Managers</h2>
+    <table id="managerTable">
+      <thead>
+        <tr>
+          <th>Citizen_ID</th>
+          <th>Name</th>
+          <th>Branch</th>
+          <th>Salary</th>
+          <th>Supervisor</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-      <form id="receptionist-form" class="employee-form">
-        <input type="hidden" id="receptionist-mode" value="create" />
-        <input type="hidden" id="receptionist-editId" />
+  <!-- RECEPTIONIST TAB -->
+  <div id="receptionistTab" class="tab-content">
+    <h2>Insert/Update Receptionists</h2>
 
-        <label
-          >Citizen_ID
-          <input
-            type="number"
-            id="receptionist-citizenId"
-            name="receptionist-citizenId"
-            required
-          />
-        </label>
-        <label
-          >First Name
-          <input
-            type="text"
-            id="receptionist-firstName"
-            name="receptionist-firstName"
-            required
-          />
-        </label>
-        <label
-          >Last Name
-          <input
-            type="text"
-            id="receptionist-lastName"
-            name="receptionist-lastName"
-            required
-          />
-        </label>
-        <label
-          >Date of Birth
-          <input
-            type="date"
-            id="receptionist-dob"
-            name="receptionist-dob"
-            required
-          />
-        </label>
-        <label
-          >Email
-          <input
-            type="email"
-            id="receptionist-email"
-            name="receptionist-email"
-            required
-          />
-        </label>
-        <label
-          >Gender
-          <input
-            type="text"
-            id="receptionist-gender"
-            name="receptionist-gender"
-            maxlength="1"
-            required
-          />
-        </label>
-        <label
-          >Branch ID
-          <input
-            type="number"
-            id="receptionist-branch"
-            name="receptionist-branch"
-            required
-          />
-        </label>
-        <label
-          >Salary
-          <input
-            type="number"
-            id="receptionist-salary"
-            name="receptionist-salary"
-            step="0.01"
-            required
-          />
-        </label>
-        <label
-          >Supervisor ID
-          <input
-            type="number"
-            id="receptionist-supervisor"
-            name="receptionist-supervisor"
-          />
-        </label>
+    <form id="receptionist-form" class="employee-form">
+      <input type="hidden" id="receptionist-mode" value="create" />
+      <input type="hidden" id="receptionist-editId" />
 
-        <button type="submit">Save</button>
-        <button type="button" id="receptionist-reset">Reset</button>
-      </form>
+      <label>Citizen_ID
+        <input type="number" id="receptionist-citizenId" name="receptionist-citizenId" required />
+      </label>
+      <label>First Name
+        <input type="text" id="receptionist-firstName" name="receptionist-firstName" required />
+      </label>
+      <label>Last Name
+        <input type="text" id="receptionist-lastName" name="receptionist-lastName" required />
+      </label>
+      <label>Date of Birth
+        <input type="date" id="receptionist-dob" name="receptionist-dob" required />
+      </label>
+      <label>Email
+        <input type="email" id="receptionist-email" name="receptionist-email" required />
+      </label>
+      <label>Gender
+        <input type="text" id="receptionist-gender" name="receptionist-gender" maxlength="1" required />
+      </label>
+      <label>Branch ID
+        <input type="number" id="receptionist-branch" name="receptionist-branch" required />
+      </label>
+      <label>Salary
+        <input type="number" id="receptionist-salary" name="receptionist-salary" step="0.01" required />
+      </label>
+      <label>Supervisor ID
+        <input type="number" id="receptionist-supervisor" name="receptionist-supervisor" />
+      </label>
 
-      <div id="receptionist-message" class="message"></div>
+      <button type="submit">Save</button>
+      <button type="button" id="receptionist-reset">Reset</button>
+    </form>
 
-      <h2>List of Receptionists</h2>
-      <table id="receptionistTable">
-        <thead>
-          <tr>
-            <th>Citizen_ID</th>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Salary</th>
-            <th>Supervisor</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="receptionist-message" class="message"></div>
 
-    <!-- SERVICE STAFF TAB -->
-    <div id="staffTab" class="tab-content">
-      <h2>Insert/Update Service Staff</h2>
+    <h2>List of Receptionists</h2>
+    <table id="receptionistTable">
+      <thead>
+        <tr>
+          <th>Citizen_ID</th>
+          <th>Name</th>
+          <th>Branch</th>
+          <th>Salary</th>
+          <th>Supervisor</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-      <form id="staff-form" class="employee-form">
-        <input type="hidden" id="staff-mode" value="create" />
-        <input type="hidden" id="staff-editId" />
+  <!-- SERVICE STAFF TAB -->
+  <div id="staffTab" class="tab-content">
+    <h2>Insert/Update Service Staff</h2>
 
-        <label
-          >Citizen_ID
-          <input
-            type="number"
-            id="staff-citizenId"
-            name="staff-citizenId"
-            required
-          />
-        </label>
-        <label
-          >First Name
-          <input
-            type="text"
-            id="staff-firstName"
-            name="staff-firstName"
-            required
-          />
-        </label>
-        <label
-          >Last Name
-          <input
-            type="text"
-            id="staff-lastName"
-            name="staff-lastName"
-            required
-          />
-        </label>
-        <label
-          >Date of Birth
-          <input type="date" id="staff-dob" name="staff-dob" required />
-        </label>
-        <label
-          >Email
-          <input type="email" id="staff-email" name="staff-email" required />
-        </label>
-        <label
-          >Gender
-          <input
-            type="text"
-            id="staff-gender"
-            name="staff-gender"
-            maxlength="1"
-            required
-          />
-        </label>
-        <label
-          >Branch ID
-          <input type="number" id="staff-branch" name="staff-branch" required />
-        </label>
-        <label
-          >Salary
-          <input
-            type="number"
-            id="staff-salary"
-            name="staff-salary"
-            step="0.01"
-            required
-          />
-        </label>
-        <label
-          >Supervisor ID
-          <input type="number" id="staff-supervisor" name="staff-supervisor" />
-        </label>
+    <form id="staff-form" class="employee-form">
+      <input type="hidden" id="staff-mode" value="create" />
+      <input type="hidden" id="staff-editId" />
 
-        <button type="submit">Save</button>
-        <button type="button" id="staff-reset">Reset</button>
-      </form>
+      <label>Citizen_ID
+        <input type="number" id="staff-citizenId" name="staff-citizenId" required />
+      </label>
+      <label>First Name
+        <input type="text" id="staff-firstName" name="staff-firstName" required />
+      </label>
+      <label>Last Name
+        <input type="text" id="staff-lastName" name="staff-lastName" required />
+      </label>
+      <label>Date of Birth
+        <input type="date" id="staff-dob" name="staff-dob" required />
+      </label>
+      <label>Email
+        <input type="email" id="staff-email" name="staff-email" required />
+      </label>
+      <label>Gender
+        <input type="text" id="staff-gender" name="staff-gender" maxlength="1" required />
+      </label>
+      <label>Branch ID
+        <input type="number" id="staff-branch" name="staff-branch" required />
+      </label>
+      <label>Salary
+        <input type="number" id="staff-salary" name="staff-salary" step="0.01" required />
+      </label>
+      <label>Supervisor ID
+        <input type="number" id="staff-supervisor" name="staff-supervisor" />
+      </label>
 
-      <div id="staff-message" class="message"></div>
+      <button type="submit">Save</button>
+      <button type="button" id="staff-reset">Reset</button>
+    </form>
 
-      <h2>List of Service Staff</h2>
-      <table id="staffTable">
-        <thead>
-          <tr>
-            <th>Citizen_ID</th>
-            <th>Name</th>
-            <th>Branch</th>
-            <th>Salary</th>
-            <th>Supervisor</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="staff-message" class="message"></div>
 
-    <script>
-      (function () {
-        const API_BASE = window.location.origin;
+    <h2>List of Service Staff</h2>
+    <table id="staffTable">
+      <thead>
+        <tr>
+          <th>Citizen_ID</th>
+          <th>Name</th>
+          <th>Branch</th>
+          <th>Salary</th>
+          <th>Supervisor</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-        const tabs = ["employee", "manager", "receptionist", "staff"];
-        const tabButtons = document.querySelectorAll(".tab-btn");
+  <script>
+    (function () {
+      const API_BASE = window.location.origin;
 
-        tabButtons.forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            tabButtons.forEach((b) => b.classList.remove("active"));
-            document
-              .querySelectorAll(".tab-content")
-              .forEach((t) => t.classList.remove("active"));
-            btn.classList.add("active");
-            const targetTab = document.getElementById(btn.dataset.target);
-            targetTab.classList.add("active");
+      const tabs = ["employee", "manager", "receptionist", "staff"];
+      const tabButtons = document.querySelectorAll(".tab-btn");
 
-            if (targetTab.id === "employeeTab")
-              await loadEmployees("employees", "employeeTable tbody");
-            if (targetTab.id === "managerTab")
-              await loadEmployees("managers", "managerTable tbody");
-            if (targetTab.id === "receptionistTab")
-              await loadEmployees("receptionists", "receptionistTable tbody");
-            if (targetTab.id === "staffTab")
-              await loadEmployees("service-staffs", "staffTable tbody");
-          });
+      tabButtons.forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          tabButtons.forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((t) => t.classList.remove("active"));
+          btn.classList.add("active");
+          const targetTab = document.getElementById(btn.dataset.target);
+          targetTab.classList.add("active");
+
+          if (targetTab.id === "employeeTab")
+            await loadEmployees("employees", "employeeTable tbody");
+          if (targetTab.id === "managerTab")
+            await loadEmployees("managers", "managerTable tbody");
+          if (targetTab.id === "receptionistTab")
+            await loadEmployees("receptionists", "receptionistTable tbody");
+          if (targetTab.id === "staffTab")
+            await loadEmployees("service-staffs", "staffTable tbody");
         });
+      });
 
-        async function loadEmployees(endpoint, tableBodyId) {
-          const tbody = document.querySelector(`#${tableBodyId}`);
-          tbody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
-          try {
-            const res = await fetch(`${API_BASE}/${endpoint}`);
-            const data = await res.json();
-            if (!Array.isArray(data) || data.length === 0) {
-              tbody.innerHTML = "<tr><td colspan='6'>No data</td></tr>";
-              return;
-            }
-            tbody.innerHTML = "";
-            data.forEach((emp) => {
-              const tr = document.createElement("tr");
-              tr.innerHTML = `
+      async function loadEmployees(endpoint, tableBodyId) {
+        const tbody = document.querySelector(`#${tableBodyId}`);
+        tbody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
+        try {
+          const res = await fetch(`${API_BASE}/${endpoint}`);
+          const data = await res.json();
+          if (!Array.isArray(data) || data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='6'>No data</td></tr>";
+            return;
+          }
+          tbody.innerHTML = "";
+          data.forEach((emp) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
                     <td>${emp.Citizen_ID}</td>
                     <td>${emp.First_Name} ${emp.Last_Name}</td>
                     <td>${emp.Branch_ID}</td>
                     <td>${emp.Salary}</td>
                     <td>${emp.Supervisor_ID ?? "-"}</td>
                     <td>
-                        <button data-action="edit" data-id="${
-                          emp.Citizen_ID
-                        }">Edit</button>
+                        <button data-action="edit" data-id="${emp.Citizen_ID}">Edit</button>
+                        <button data-action="delete" data-id="${emp.Citizen_ID}">Delete</button>
                     </td>
                 `;
-              tbody.appendChild(tr);
-            });
-          } catch (err) {
-            tbody.innerHTML =
-              "<tr><td colspan='6'>Error loading data</td></tr>";
-          }
+            tbody.appendChild(tr);
+          });
+        } catch (err) {
+          tbody.innerHTML =
+            "<tr><td colspan='6'>Error loading data</td></tr>";
         }
+      }
 
-        function setupForm(prefix, endpoint, tableBodyId) {
-          const form = document.getElementById(`${prefix}-form`);
-          const modeInput = form.querySelector(`#${prefix}-mode`);
-          const editIdInput = form.querySelector(`#${prefix}-editId`);
-          const messageDiv = form.nextElementSibling;
+      function setupForm(prefix, endpoint, tableBodyId) {
+        const form = document.getElementById(`${prefix}-form`);
+        const modeInput = form.querySelector(`#${prefix}-mode`);
+        const editIdInput = form.querySelector(`#${prefix}-editId`);
+        const messageDiv = form.nextElementSibling;
 
-          form
-            .querySelector("button[type=button]")
-            .addEventListener("click", () => {
+        form
+          .querySelector("button[type=button]")
+          .addEventListener("click", () => {
+            form.reset();
+            modeInput.value = "create";
+            editIdInput.value = "";
+            messageDiv.textContent = "";
+          });
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const inputs = Object.fromEntries(new FormData(form).entries());
+
+          const body = {
+            Citizen_ID: parseInt(inputs[`${prefix}-citizenId`]),
+            FirstName: inputs[`${prefix}-firstName`],
+            LastName: inputs[`${prefix}-lastName`],
+            DateOfBirth: inputs[`${prefix}-dob`],
+            Email: inputs[`${prefix}-email`],
+            Gender: inputs[`${prefix}-gender`],
+            Branch_ID: parseInt(inputs[`${prefix}-branch`]),
+            Salary: parseFloat(inputs[`${prefix}-salary`]),
+            Supervisor_ID: inputs[`${prefix}-supervisor`]
+              ? parseInt(inputs[`${prefix}-supervisor`])
+              : null,
+          };
+
+          try {
+            let res;
+            if (modeInput.value === "create") {
+              res = await fetch(`${API_BASE}/${endpoint}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+              });
+            } else {
+              const editId = editIdInput.value;
+              const updateBody = { ...body };
+              delete updateBody.Citizen_ID;
+              res = await fetch(`${API_BASE}/${endpoint}/${editId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updateBody),
+              });
+            }
+            const data = await res.json();
+            if (!res.ok) {
+              messageDiv.textContent = data.error || "Error";
+              messageDiv.className = "message error";
+            } else {
+              messageDiv.textContent = data.message || "Success";
+              messageDiv.className = "message success";
               form.reset();
               modeInput.value = "create";
               editIdInput.value = "";
-              messageDiv.textContent = "";
-            });
+              await loadEmployees(endpoint, tableBodyId);
+            }
+          } catch (err) {
+            messageDiv.textContent = "Request failed";
+            messageDiv.className = "message error";
+          }
+        });
 
-          form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const inputs = Object.fromEntries(new FormData(form).entries());
+        document
+          .querySelector(`#${tableBodyId}`)
+          .addEventListener("click", async (e) => {
+            const btn = e.target;
+            const action = btn.dataset.action;
+            const id = btn.dataset.id;
+            if (!action) return;
 
-            const body = {
-              Citizen_ID: parseInt(inputs[`${prefix}-citizenId`]),
-              FirstName: inputs[`${prefix}-firstName`],
-              LastName: inputs[`${prefix}-lastName`],
-              DateOfBirth: inputs[`${prefix}-dob`],
-              Email: inputs[`${prefix}-email`],
-              Gender: inputs[`${prefix}-gender`],
-              Branch_ID: parseInt(inputs[`${prefix}-branch`]),
-              Salary: parseFloat(inputs[`${prefix}-salary`]),
-              Supervisor_ID: inputs[`${prefix}-supervisor`]
-                ? parseInt(inputs[`${prefix}-supervisor`])
-                : null,
-            };
+            // Edit handling (existing)
+            if (action === "edit") {
+              const tbody = document.querySelector(`#${tableBodyId}`);
+              try {
+                const res = await fetch(`${API_BASE}/${endpoint}`);
+                const data = await res.json();
+                const emp = data.find((x) => x.Citizen_ID == id);
+                if (!emp) return;
 
-            try {
-              let res;
-              if (modeInput.value === "create") {
-                res = await fetch(`${API_BASE}/${endpoint}`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(body),
-                });
-              } else {
-                const editId = editIdInput.value;
-                const updateBody = { ...body };
-                delete updateBody.Citizen_ID;
-                res = await fetch(`${API_BASE}/${endpoint}/${editId}`, {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(updateBody),
-                });
+                modeInput.value = "edit";
+                editIdInput.value = emp.Citizen_ID;
+
+                form.querySelector(`#${prefix}-citizenId`).value =
+                  emp.Citizen_ID;
+                form.querySelector(`#${prefix}-firstName`).value =
+                  emp.First_Name;
+                form.querySelector(`#${prefix}-lastName`).value =
+                  emp.Last_Name;
+                form.querySelector(`#${prefix}-dob`).value =
+                  emp.Birth_Date?.split("T")[0] || "";
+                form.querySelector(`#${prefix}-email`).value =
+                  emp.Email ?? "";
+                form.querySelector(`#${prefix}-gender`).value =
+                  emp.Gender ?? "";
+                form.querySelector(`#${prefix}-branch`).value = emp.Branch_ID;
+                form.querySelector(`#${prefix}-salary`).value = emp.Salary;
+                form.querySelector(`#${prefix}-supervisor`).value =
+                  emp.Supervisor_ID ?? "";
+              } catch (err) {
+                console.error(err);
               }
-              const data = await res.json();
-              if (!res.ok) {
-                messageDiv.textContent = data.error || "Error";
+            }
+
+            // Delete handling (NEW)
+            if (action === "delete") {
+              if (!confirm(`Delete ${prefix} with ID ${id}?`)) return;
+              try {
+                const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
+                  method: "DELETE",
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                  messageDiv.textContent =
+                    data.error || data.message || "Delete failed";
+                  messageDiv.className = "message error";
+                } else {
+                  messageDiv.textContent = data.message || "Deleted";
+                  messageDiv.className = "message success";
+                  await loadEmployees(endpoint, tableBodyId);
+                }
+              } catch (err) {
+                messageDiv.textContent = "Request failed";
                 messageDiv.className = "message error";
-              } else {
-                messageDiv.textContent = data.message || "Success";
-                messageDiv.className = "message success";
-                form.reset();
-                modeInput.value = "create";
-                editIdInput.value = "";
-                await loadEmployees(endpoint, tableBodyId);
               }
-            } catch (err) {
-              messageDiv.textContent = "Request failed";
-              messageDiv.className = "message error";
             }
           });
+      }
 
-          document
-            .querySelector(`#${tableBodyId}`)
-            .addEventListener("click", async (e) => {
-              const btn = e.target;
-              const action = btn.dataset.action;
-              const id = btn.dataset.id;
-              if (!action) return;
+      setupForm("employee", "employees", "employeeTable tbody");
+      setupForm("manager", "managers", "managerTable tbody");
+      setupForm("receptionist", "receptionists", "receptionistTable tbody");
+      setupForm("staff", "service-staffs", "staffTable tbody");
 
-              // Edit handling (existing)
-              if (action === "edit") {
-                const tbody = document.querySelector(`#${tableBodyId}`);
-                try {
-                  const res = await fetch(`${API_BASE}/${endpoint}`);
-                  const data = await res.json();
-                  const emp = data.find((x) => x.Citizen_ID == id);
-                  if (!emp) return;
+      loadEmployees("employees", "employeeTable tbody");
+    })();
+  </script>
+</body>
 
-                  modeInput.value = "edit";
-                  editIdInput.value = emp.Citizen_ID;
-
-                  form.querySelector(`#${prefix}-citizenId`).value =
-                    emp.Citizen_ID;
-                  form.querySelector(`#${prefix}-firstName`).value =
-                    emp.First_Name;
-                  form.querySelector(`#${prefix}-lastName`).value =
-                    emp.Last_Name;
-                  form.querySelector(`#${prefix}-dob`).value =
-                    emp.Birth_Date?.split("T")[0] || "";
-                  form.querySelector(`#${prefix}-email`).value =
-                    emp.Email ?? "";
-                  form.querySelector(`#${prefix}-gender`).value =
-                    emp.Gender ?? "";
-                  form.querySelector(`#${prefix}-branch`).value = emp.Branch_ID;
-                  form.querySelector(`#${prefix}-salary`).value = emp.Salary;
-                  form.querySelector(`#${prefix}-supervisor`).value =
-                    emp.Supervisor_ID ?? "";
-                } catch (err) {
-                  console.error(err);
-                }
-              }
-
-              // Delete handling (NEW)
-              if (action === "delete") {
-                if (!confirm(`Delete ${prefix} with ID ${id}?`)) return;
-                try {
-                  const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
-                    method: "DELETE",
-                  });
-                  const data = await res.json();
-                  if (!res.ok) {
-                    messageDiv.textContent =
-                      data.error || data.message || "Delete failed";
-                    messageDiv.className = "message error";
-                  } else {
-                    messageDiv.textContent = data.message || "Deleted";
-                    messageDiv.className = "message success";
-                    await loadEmployees(endpoint, tableBodyId);
-                  }
-                } catch (err) {
-                  messageDiv.textContent = "Request failed";
-                  messageDiv.className = "message error";
-                }
-              }
-            });
-        }
-
-        setupForm("employee", "employees", "employeeTable tbody");
-        setupForm("manager", "managers", "managerTable tbody");
-        setupForm("receptionist", "receptionists", "receptionistTable tbody");
-        setupForm("staff", "service-staffs", "staffTable tbody");
-
-        loadEmployees("employees", "employeeTable tbody");
-      })();
-    </script>
-  </body>
 </html>
