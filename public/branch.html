@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Branch Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+        }
+
+        #branch-container {
+            padding: 20px 30px;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            max-width: 1100px;
+            margin: 0 auto 30px;
+        }
+
+        h2 {
+            margin: 0 0 12px 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .controls button {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            background: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .message {
+            margin-top: 10px;
+        }
+
+        .message.error {
+            color: red;
+        }
+
+        .message.success {
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="branch-container">
+        <h2>List of Branches</h2>
+        <div class="controls">
+            <button id="reloadBtn">Reload</button>
+            <div id="message" class="message"></div>
+        </div>
+
+        <table id="branchTable" aria-live="polite">
+            <thead id="branchHead"></thead>
+            <tbody id="branchBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        (function () {
+            const API_BASE = "http://localhost:3000";
+            const head = document.getElementById("branchHead");
+            const body = document.getElementById("branchBody");
+            const msg = document.getElementById("message");
+            const reloadBtn = document.getElementById("reloadBtn");
+
+            async function loadBranches() {
+                head.innerHTML = "";
+                body.innerHTML = "<tr><td colspan='10'>Loading...</td></tr>";
+                msg.textContent = "";
+                try {
+                    const res = await fetch(`${API_BASE}/branches`);
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({ error: res.statusText }));
+                        msg.textContent = err.error || "Failed to load branches";
+                        msg.className = "message error";
+                        body.innerHTML = "<tr><td colspan='10'>Error</td></tr>";
+                        return;
+                    }
+                    const rows = await res.json();
+                    if (!Array.isArray(rows) || rows.length === 0) {
+                        head.innerHTML = "";
+                        body.innerHTML = "<tr><td colspan='10'>No data</td></tr>";
+                        return;
+                    }
+
+                    // Build header from known Branch columns if present, else fallback to keys
+                    const keys = ['Branch_ID', 'Branch_Name', 'Branch_Address', 'TotalEmployees'];
+                    const first = rows[0];
+                    const availableKeys = keys.filter(k => k in first);
+                    const headerKeys = availableKeys.length ? availableKeys : Object.keys(first);
+
+                    head.innerHTML = "<tr>" + headerKeys.map(k => `<th>${k}</th>`).join("") + "</tr>";
+                    body.innerHTML = "";
+                    rows.forEach(r => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = headerKeys.map(k => `<td>${r[k] ?? ""}</td>`).join("");
+                        body.appendChild(tr);
+                    });
+                } catch (e) {
+                    msg.textContent = "Request failed";
+                    msg.className = "message error";
+                    body.innerHTML = "<tr><td colspan='10'>Request failed</td></tr>";
+                }
+            }
+
+            reloadBtn.addEventListener("click", loadBranches);
+            loadBranches();
+        })();
+    </script>
+</body>
+
+</html>

@@ -582,42 +582,29 @@
           tbody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
           try {
             const res = await fetch(`${API_BASE}/${endpoint}`);
-
-            // Log status nếu lỗi
-            if (!res.ok) {
-              const text = await res.text();
-              console.error(`Error ${res.status} from /${endpoint}:`, text);
-              tbody.innerHTML = `<tr><td colspan="6">Error ${res.status}</td></tr>`;
-              return;
-            }
-
             const data = await res.json();
-            console.log(`Data from /${endpoint}:`, data);
-
             if (!Array.isArray(data) || data.length === 0) {
               tbody.innerHTML = "<tr><td colspan='6'>No data</td></tr>";
               return;
             }
-
             tbody.innerHTML = "";
             data.forEach((emp) => {
               const tr = document.createElement("tr");
               tr.innerHTML = `
-                        <td>${emp.Citizen_ID}</td>
-                        <td>${emp.First_Name} ${emp.Last_Name}</td>
-                        <td>${emp.Branch_ID}</td>
-                        <td>${emp.Salary}</td>
-                        <td>${emp.Supervisor_ID ?? "-"}</td>
-                        <td>
-                            <button data-action="edit" data-id="${
-                              emp.Citizen_ID
-                            }">Edit</button>
-                        </td>
-                    `;
+                    <td>${emp.Citizen_ID}</td>
+                    <td>${emp.First_Name} ${emp.Last_Name}</td>
+                    <td>${emp.Branch_ID}</td>
+                    <td>${emp.Salary}</td>
+                    <td>${emp.Supervisor_ID ?? "-"}</td>
+                    <td>
+                        <button data-action="edit" data-id="${
+                          emp.Citizen_ID
+                        }">Edit</button>
+                    </td>
+                `;
               tbody.appendChild(tr);
             });
           } catch (err) {
-            console.error("loadEmployees error:", err);
             tbody.innerHTML =
               "<tr><td colspan='6'>Error loading data</td></tr>";
           }
@@ -696,35 +683,64 @@
             .querySelector(`#${tableBodyId}`)
             .addEventListener("click", async (e) => {
               const btn = e.target;
-              if (btn.dataset.action !== "edit") return;
+              const action = btn.dataset.action;
               const id = btn.dataset.id;
+              if (!action) return;
 
-              const tbody = document.querySelector(`#${tableBodyId}`);
-              try {
-                const res = await fetch(`${API_BASE}/${endpoint}`);
-                const data = await res.json();
-                const emp = data.find((x) => x.Citizen_ID == id);
-                if (!emp) return;
+              // Edit handling (existing)
+              if (action === "edit") {
+                const tbody = document.querySelector(`#${tableBodyId}`);
+                try {
+                  const res = await fetch(`${API_BASE}/${endpoint}`);
+                  const data = await res.json();
+                  const emp = data.find((x) => x.Citizen_ID == id);
+                  if (!emp) return;
 
-                modeInput.value = "edit";
-                editIdInput.value = emp.Citizen_ID;
+                  modeInput.value = "edit";
+                  editIdInput.value = emp.Citizen_ID;
 
-                form.querySelector(`#${prefix}-citizenId`).value =
-                  emp.Citizen_ID;
-                form.querySelector(`#${prefix}-firstName`).value =
-                  emp.First_Name;
-                form.querySelector(`#${prefix}-lastName`).value = emp.Last_Name;
-                form.querySelector(`#${prefix}-dob`).value =
-                  emp.Birth_Date?.split("T")[0] || "";
-                form.querySelector(`#${prefix}-email`).value = emp.Email ?? "";
-                form.querySelector(`#${prefix}-gender`).value =
-                  emp.Gender ?? "";
-                form.querySelector(`#${prefix}-branch`).value = emp.Branch_ID;
-                form.querySelector(`#${prefix}-salary`).value = emp.Salary;
-                form.querySelector(`#${prefix}-supervisor`).value =
-                  emp.Supervisor_ID ?? "";
-              } catch (err) {
-                console.error(err);
+                  form.querySelector(`#${prefix}-citizenId`).value =
+                    emp.Citizen_ID;
+                  form.querySelector(`#${prefix}-firstName`).value =
+                    emp.First_Name;
+                  form.querySelector(`#${prefix}-lastName`).value =
+                    emp.Last_Name;
+                  form.querySelector(`#${prefix}-dob`).value =
+                    emp.Birth_Date?.split("T")[0] || "";
+                  form.querySelector(`#${prefix}-email`).value =
+                    emp.Email ?? "";
+                  form.querySelector(`#${prefix}-gender`).value =
+                    emp.Gender ?? "";
+                  form.querySelector(`#${prefix}-branch`).value = emp.Branch_ID;
+                  form.querySelector(`#${prefix}-salary`).value = emp.Salary;
+                  form.querySelector(`#${prefix}-supervisor`).value =
+                    emp.Supervisor_ID ?? "";
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+
+              // Delete handling (NEW)
+              if (action === "delete") {
+                if (!confirm(`Delete ${prefix} with ID ${id}?`)) return;
+                try {
+                  const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
+                    method: "DELETE",
+                  });
+                  const data = await res.json();
+                  if (!res.ok) {
+                    messageDiv.textContent =
+                      data.error || data.message || "Delete failed";
+                    messageDiv.className = "message error";
+                  } else {
+                    messageDiv.textContent = data.message || "Deleted";
+                    messageDiv.className = "message success";
+                    await loadEmployees(endpoint, tableBodyId);
+                  }
+                } catch (err) {
+                  messageDiv.textContent = "Request failed";
+                  messageDiv.className = "message error";
+                }
               }
             });
         }

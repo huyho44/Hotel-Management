@@ -115,6 +115,35 @@ app.put("/humans/:id", async (req, res) => {
   }
 });
 
+// DELETE Human
+app.delete("/humans/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await poolConnect;
+
+    const request = pool.request();
+    request.input("Citizen_ID", sql.Int, parseInt(id));
+
+    const result = await request.execute("DeleteHuman");
+
+    res.json({
+      message: "Human deleted successfully",
+      data: result.recordset ?? null,
+    });
+  } catch (err) {
+    console.error("Error in DELETE /humans/:id:", err);
+
+    const sqlMessage =
+      err.originalError?.info?.message || // Most correct for MSSQL
+      err.originalError?.message ||
+      err.message ||
+      "Database error";
+
+    return res.status(400).json({ error: sqlMessage });
+  }
+});
+
 // ========== EMPLOYEE ==========
 app.get("/employees", async (req, res) => {
   try {
@@ -254,6 +283,32 @@ app.put("/employees/:id", async (req, res) => {
   }
 });
 
+app.delete("/employees/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await poolConnect;
+
+    const request = pool.request();
+    request.input("Citizen_ID", sql.Int, parseInt(id));
+
+    const result = await request.execute("DeleteEmployee");
+
+    res.json({
+      message: "Employee deleted successfully",
+      data: result.recordset ?? null,
+    });
+  } catch (err) {
+    console.error("Error in DELETE /employees/:id:", err);
+
+    const sqlMessage =
+      err.originalError?.info?.message ||
+      err.originalError?.message ||
+      err.message ||
+      "Database error";
+
+    return res.status(400).json({ error: sqlMessage });
+  }
+});
 // ========== MANAGERS ==========
 
 app.get("/managers", async (req, res) => {
@@ -373,6 +428,34 @@ app.put("/managers/:id", async (req, res) => {
   }
 });
 
+// DELETE Manager
+app.delete("/managers/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await poolConnect;
+
+    const request = pool.request();
+    request.input("Citizen_ID", sql.Int, parseInt(id));
+
+    const result = await request.execute("DeleteManager");
+
+    res.json({
+      message: "Manager deleted successfully",
+      data: result.recordset ?? null,
+    });
+  } catch (err) {
+    console.error("Error in DELETE /managers/:id:", err);
+
+    const sqlMessage =
+      err.originalError?.info?.message ||
+      err.originalError?.message ||
+      err.message ||
+      "Database error";
+
+    return res.status(400).json({ error: sqlMessage });
+  }
+});
+
 // ========== RECEPTIONISTS ==========
 app.get("/receptionists", async (req, res) => {
   try {
@@ -482,6 +565,34 @@ app.put("/receptionists/:id", async (req, res) => {
       err.message ||
       "Database error";
     res.status(500).json({ error: message });
+  }
+});
+
+// DELETE Receptionist
+app.delete("/receptionists/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await poolConnect;
+
+    const request = pool.request();
+    request.input("Citizen_ID", sql.Int, parseInt(id));
+
+    const result = await request.execute("DeleteReceptionist");
+
+    res.json({
+      message: "Receptionist deleted successfully",
+      data: result.recordset ?? null,
+    });
+  } catch (err) {
+    console.error("Error in DELETE /receptionists/:id:", err);
+
+    const sqlMessage =
+      err.originalError?.info?.message ||
+      err.originalError?.message ||
+      err.message ||
+      "Database error";
+
+    return res.status(400).json({ error: sqlMessage });
   }
 });
 
@@ -603,6 +714,48 @@ app.put("/service-staffs/:id", async (req, res) => {
   }
 });
 
+app.delete("/service-staffs/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await poolConnect;
+
+    const request = pool.request();
+    request.input("Citizen_ID", sql.Int, parseInt(id));
+
+    const result = await request.execute("DeleteServiceStaff");
+
+    res.json({
+      message: "Service Staff deleted successfully",
+      data: result.recordset ?? null,
+    });
+  } catch (err) {
+    console.error("Error in DELETE /service-staffs/:id:", err);
+
+    const sqlMessage =
+      err.originalError?.info?.message ||
+      err.originalError?.message ||
+      err.message ||
+      "Database error";
+
+    return res.status(400).json({ error: sqlMessage });
+  }
+});
+
+// GET Branches
+app.get("/branches", async (req, res) => {
+  try {
+    await poolConnect;
+
+    const result = await pool.request().query(`
+      SELECT * FROM Branch
+    `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error in GET /branches:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 ///////////////////////////////////
 ////////////PROCEDURE/////////////
 
