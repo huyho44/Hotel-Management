@@ -1,154 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Hotel Management System</title>
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #fafafa;
-      }
 
-      nav {
-        background: #1e3c72;
-        color: white;
-        padding: 10px 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Hotel Management System</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+    }
 
-      nav .logo {
-        font-size: 22px;
-        font-weight: bold;
-      }
+    nav {
+      background: #1e3c72;
+      color: white;
+      padding: 10px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
 
-      nav ul {
-        list-style: none;
-        display: flex;
-        gap: 20px;
-      }
+    nav .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
 
-      nav ul li {
-        cursor: pointer;
-        transition: opacity 0.3s;
-      }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
 
-      nav ul li:hover {
-        opacity: 0.7;
-      }
+    nav ul li {
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
 
-      .hero {
-        background: linear-gradient(#1e3c72, #2a5298);
-        color: white;
-        padding: 40px 30px;
-        text-align: center;
-      }
+    nav ul li:hover {
+      opacity: 0.7;
+    }
 
-      .hero h1 {
-        font-size: 40px;
-        margin-bottom: 10px;
-      }
+    .hero {
+      background: linear-gradient(#1e3c72, #2a5298);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
 
-      #content {
-        padding: 40px;
-        min-height: 500px;
-        background: white;
-        max-width: 1200px;
-        margin: 0 auto;
-        border-radius: 10px;
-        margin-top: 30px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      }
-    </style>
-  </head>
+    .hero h1 {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
 
-  <body>
-    <!-- Nav bar -->
-    <nav>
-      <div class="logo">Hotel Esabatad</div>
-      <ul>
-        <li data-page="home">Home</li>
-        <li data-page="humans.html">Human</li>
-        <li data-page="employees.html">Employee</li>
-        <li data-page="branch.html">Branch</li>
-        <li data-page="service-staff-performance.html">
-          Service Staff Performance
-        </li>
-        <li data-page="reports.html">Reports</li>
-      </ul>
-    </nav>
+    #content {
+      padding: 40px;
+      min-height: 500px;
+      background: white;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-radius: 10px;
+      margin-top: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
 
-    <!-- banner -->
-    <div class="hero">
-      <h1>Hotel Management System</h1>
-    </div>
+<body>
+  <!-- Nav bar -->
+  <nav>
+    <div class="logo">Hotel Esabatad</div>
+    <ul>
+      <li data-page="home">Home</li>
+      <li data-page="humans.html">Human</li>
+      <li data-page="branch.html">Branch</li>
+      <li data-page="employees.html">Employee</li>
+      <li data-page="service-staff-performance.html">
+        Service Staff Performance
+      </li>
+      <li data-page="reports.html">Reports</li>
+    </ul>
+  </nav>
 
-    <!-- content layout -->
-    <div id="content">
-      <h2>Home</h2>
-      <p>Select a menu option above to load the content.</p>
-    </div>
+  <!-- banner -->
+  <div class="hero">
+    <h1>Hotel Management System</h1>
+  </div>
 
-    <script>
-      const contentDiv = document.getElementById("content");
-      const navLinks = document.querySelectorAll("nav ul li");
+  <!-- content layout -->
+  <div id="content">
+    <h2>Home</h2>
+    <p>Select a menu option above to load the content.</p>
+  </div>
 
-      async function loadPage(page) {
-        // Home
-        if (page === "home" || !page) {
-          contentDiv.innerHTML = `
+  <script>
+    const contentDiv = document.getElementById("content");
+    const navLinks = document.querySelectorAll("nav ul li");
+
+    async function loadPage(page) {
+      // Home
+      if (page === "home" || !page) {
+        contentDiv.innerHTML = `
         <h2>Home</h2>
         <p>Select a menu option above to load the content.</p>`;
-          return;
-        }
-
-        try {
-          const res = await fetch(page);
-          if (!res.ok) throw new Error("Failed to load page");
-
-          const html = await res.text();
-          contentDiv.innerHTML = html;
-
-          const scripts = contentDiv.querySelectorAll("script");
-          scripts.forEach((script) => {
-            const newScript = document.createElement("script");
-            if (script.src) {
-              newScript.src = script.src;
-            } else {
-              newScript.textContent = script.textContent;
-            }
-            document.body.appendChild(newScript);
-          });
-        } catch (err) {
-          console.error(err);
-          contentDiv.innerHTML =
-            "<p style='color:red'>Failed to load page.</p>";
-        }
+        return;
       }
 
-      navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-          const page = link.getAttribute("data-page");
-          loadPage(page);
+      try {
+        const res = await fetch(page);
+        if (!res.ok) throw new Error("Failed to load page");
+
+        const html = await res.text();
+        contentDiv.innerHTML = html;
+
+        const scripts = contentDiv.querySelectorAll("script");
+        scripts.forEach((script) => {
+          const newScript = document.createElement("script");
+          if (script.src) {
+            newScript.src = script.src;
+          } else {
+            newScript.textContent = script.textContent;
+          }
+          document.body.appendChild(newScript);
         });
-      });
+      } catch (err) {
+        console.error(err);
+        contentDiv.innerHTML =
+          "<p style='color:red'>Failed to load page.</p>";
+      }
+    }
 
-      window.addEventListener("DOMContentLoaded", () => {
-        const params = new URLSearchParams(window.location.search);
-        const pageParam = params.get("page");
-
-        if (pageParam) {
-          loadPage(pageParam);
-        } else {
-          loadPage("home");
-        }
+    navLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        const page = link.getAttribute("data-page");
+        loadPage(page);
       });
-    </script>
-  </body>
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = params.get("page");
+
+      if (pageParam) {
+        loadPage(pageParam);
+      } else {
+        loadPage("home");
+      }
+    });
+  </script>
+</body>
+
 </html>

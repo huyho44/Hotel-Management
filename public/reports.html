@@ -3,11 +3,9 @@
     #reports-page {
       font-family: "Segoe UI", Arial, sans-serif;
       color: #1a2734;
-      background: linear-gradient(
-        135deg,
-        rgba(30, 60, 114, 0.06),
-        rgba(42, 82, 152, 0.08)
-      );
+      background: linear-gradient(135deg,
+          rgba(30, 60, 114, 0.06),
+          rgba(42, 82, 152, 0.08));
       padding: 10px 5px 30px;
     }
 
@@ -194,12 +192,7 @@
       <form id="customer-form">
         <label>
           Customer ID *
-          <input
-            type="number"
-            id="customer-id"
-            placeholder="Example: 100001016"
-            required
-          />
+          <input type="number" id="customer-id" placeholder="Example: 100001016" required />
         </label>
         <label>
           From Date
@@ -230,12 +223,7 @@
       <form id="branch-form">
         <label>
           Branch ID *
-          <input
-            type="number"
-            id="branch-id"
-            placeholder="Example: 1"
-            required
-          />
+          <input type="number" id="branch-id" placeholder="Example: 1" required />
         </label>
         <label>
           From Date *
@@ -282,20 +270,20 @@
             <div class="stat">
               <small>Total Room Price</small>
               <strong>${formatCurrency(
-                payload.TotalRoomCharge ?? payload.TotalRoomRevenue ?? 0
-              )}</strong>
+          payload.TotalRoomCharge ?? payload.TotalRoomRevenue ?? 0
+        )}</strong>
             </div>
             <div class="stat">
               <small>Total Service Price</small>
               <strong>${formatCurrency(
-                payload.TotalServiceCharge ?? payload.TotalServiceRevenue ?? 0
-              )}</strong>
+          payload.TotalServiceCharge ?? payload.TotalServiceRevenue ?? 0
+        )}</strong>
             </div>
             <div class="stat">
               <small>Total</small>
               <strong>${formatCurrency(
-                payload.TotalSpending ?? payload.TotalRevenue ?? 0
-              )}</strong>
+          payload.TotalSpending ?? payload.TotalRevenue ?? 0
+        )}</strong>
             </div>
           </div>
         `;
