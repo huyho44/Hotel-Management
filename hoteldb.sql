@@ -240,6 +240,8 @@ CREATE TABLE Register (
 );
 
 GO
+
+
 -- ========================-- ======================== SEMANTIC CONSTRAINTS
 CREATE OR ALTER TRIGGER CheckEmployeeAge
 ON Employee
@@ -1418,49 +1420,351 @@ BEGIN
 
 END;
 GO
------------------------------------------------------------------------------------
-CREATE OR ALTER TRIGGER PreventIDUpdate_Human
-ON Human
-AFTER UPDATE
-AS
-BEGIN
-    IF UPDATE(Citizen_ID)
-    BEGIN
-        IF EXISTS (
-            SELECT 1
-            FROM inserted i
-            JOIN deleted d ON i.Citizen_ID = d.Citizen_ID
-            WHERE i.Citizen_ID <> d.Citizen_ID
-        )
-        BEGIN
-            ROLLBACK TRANSACTION;
-            THROW 50014, 'Cannot edit Citizen_ID in Human.', 1;
-        END
-    END
-END;
------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+-- SELECT PROCEDURES
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
 GO
-CREATE OR ALTER TRIGGER PreventIDUpdate_Employee
-ON Employee
-AFTER UPDATE
+
+CREATE OR ALTER PROCEDURE StatsRoomTypeUsage
+    @BranchID    INT,
+    @StartDate   DATE,
+    @EndDate     DATE,
+    @MinBookings INT = 1
 AS
 BEGIN
-    IF UPDATE(Citizen_ID)
-    BEGIN
-        IF EXISTS (
-            SELECT 1
-            FROM inserted i
-            JOIN deleted d ON i.Citizen_ID = d.Citizen_ID
-            WHERE i.Citizen_ID <> d.Citizen_ID
-        )
-        BEGIN
-            ROLLBACK TRANSACTION;
-            THROW 50015, 'Cannot edit Citizen_ID in Employee.', 1;
-        END
-    END
+    SELECT 
+        Room_Type.Room_Type_ID,
+        Room_Type.Room_Name,
+        COUNT(DISTINCT Booking.Booking_ID) AS Number_of_Bookings,
+        SUM(DATEDIFF(DAY, Booking.Check_in_Time, Booking.Check_out_Time)) AS Total_Nights
+    FROM Booking 
+    JOIN Consist    ON Booking.Booking_ID = Consist.Booking_ID
+    
+    JOIN Room          ON Consist.Room_No   = Room.Room_No 
+    AND Consist.Branch_ID = Room.Branch_ID
+    
+    JOIN Room_Type     ON Room.Room_Type_ID = Room_Type.Room_Type_ID
+    
+    WHERE
+        Room.Branch_ID = @BranchID
+        AND Booking.Check_in_Time >= @StartDate
+        AND Booking.Check_in_Time <  DATEADD(DAY, 1, @EndDate)
+    GROUP BY
+        Room_Type.Room_Type_ID,
+        Room_Type.Room_Name
+    HAVING
+        COUNT(DISTINCT Booking.Booking_ID) >= @MinBookings
+    ORDER BY
+        Total_Nights DESC;   
 END;
 
+GO
+---------------------------------------------------------------------------------------
+CREATE OR ALTER PROCEDURE Service_Staff_Performance
+@BranchID INT,
+@FromDate DATE,
+@EndDate DATE,
+@MinKPI DECIMAL(10,2) = 0
+AS
+BEGIN 
+    ;WITH ServiceBasePrice AS (
+        SELECT 
+            st.Service_Type_ID,
+            COALESCE(l.Default_Price, fb.Price, 0) AS BasePrice
+        FROM Service_Type st
+        LEFT JOIN Laundry l
+            ON st.Service_Type_ID = l.Service_Type_ID
+        LEFT JOIN Food_Beverage fb
+            ON st.Service_Type_ID = fb.Service_Type_ID
+    ),
+    
+    ServiceAddPrice AS (
+        SELECT 
+            a.Service_Type_ID,
+            SUM(a.Price) AS AddPrice
+        FROM Additional_Service a
+        GROUP BY a.Service_Type_ID
+    ),
+    
+    ServiceTotalPrice AS (
+        SELECT 
+            sb.Service_Type_ID,
+            sb.BasePrice + COALESCE(sa.AddPrice, 0) AS TotalPrice
+        FROM ServiceBasePrice sb
+        LEFT JOIN ServiceAddPrice sa
+            ON sb.Service_Type_ID = sa.Service_Type_ID
+    )
+    
+    SELECT 
+    h.Citizen_ID, 
+    CONCAT(h.First_Name ,' ',h.Last_Name) as Full_Name, 
+    e.Branch_ID, 
+    COUNT(p.Service_Type_ID) AS Total_Performed, 
+    COALESCE(SUM(stp.TotalPrice), 0) AS Total_Revenue
+    
+    FROM 
+    Service_Staff ss
+    JOIN Employee e         ON ss.Citizen_ID = e.Citizen_ID
+    JOIN Human h            ON h.Citizen_ID = ss.Citizen_ID
+    LEFT JOIN Perform p     ON ss.Citizen_ID = p.Citizen_ID
+                            AND p.Time >= @FromDate
+                            AND p.Time < DATEADD(DAY, 1, @EndDate)
+    LEFT JOIN ServiceTotalPrice stp
+                            ON p.Service_Type_ID = stp.Service_Type_ID
 
+    WHERE 
+        e.Branch_ID = @BranchID
+        
+    GROUP BY 
+    h.Citizen_ID,
+    CONCAT(h.First_Name ,' ',h.Last_Name), 
+    e.Branch_ID
+
+    Having 
+    COALESCE(SUM(stp.TotalPrice), 0) >= @MinKPI
+
+    ORDER BY
+    Total_Revenue DESC;
+    
+END;
+
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+--------- FUNCTIONS
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+GO
+
+CREATE OR ALTER FUNCTION fnCustomerTotalSpending
+(
+    @CustomerID INT,
+    @FromDate DATE = NULL,
+    @ToDate DATE = NULL
+)
+RETURNS @Result TABLE
+(
+    Customer_ID INT,
+    FromDate DATE,
+    ToDate DATE,
+    TotalRoomCharge DECIMAL(18,2),
+    TotalServiceCharge DECIMAL(18,2),
+    TotalSpending DECIMAL(18,2)
+)
+AS
+BEGIN
+    IF @CustomerID IS NULL OR @CustomerID <= 0 RETURN;
+    IF NOT EXISTS (SELECT 1 FROM Customer WHERE Citizen_ID = @CustomerID) RETURN;
+
+    IF @FromDate IS NULL SET @FromDate = '1900-01-01';
+    IF @ToDate IS NULL SET @ToDate = '9999-12-31';
+    IF @FromDate > @ToDate RETURN;
+
+    DECLARE @Bookings TABLE
+    (
+        RowNum INT IDENTITY(1,1),
+        Booking_ID INT,
+        CheckIn DATE,
+        CheckOut DATE
+    );
+
+    INSERT INTO @Bookings (Booking_ID, CheckIn, CheckOut)
+    SELECT b.Booking_ID, b.CheckIn, b.CheckOut
+    FROM Booking b
+    WHERE b.Customer_Citizen_ID = @CustomerID
+      AND b.CheckIn >= @FromDate
+      AND b.CheckOut <= @ToDate;
+
+    DECLARE 
+        @MaxRow INT = (SELECT COUNT(*) FROM @Bookings),
+        @Idx INT = 1,
+        @BookingID INT,
+        @CheckIn DATE,
+        @CheckOut DATE,
+        @Nights INT,
+        @RoomCharge DECIMAL(18,2),
+        @ServiceCharge DECIMAL(18,2),
+        @TotalRoom DECIMAL(18,2) = 0,
+        @TotalService DECIMAL(18,2) = 0;
+
+    WHILE @Idx <= @MaxRow
+    BEGIN
+        SELECT 
+            @BookingID = Booking_ID,
+            @CheckIn = CheckIn,
+            @CheckOut = CheckOut
+        FROM @Bookings
+        WHERE RowNum = @Idx;
+
+        SET @Nights = DATEDIFF(DAY, @CheckIn, @CheckOut);
+        IF @Nights <= 0 SET @Nights = 1;
+
+        SELECT @RoomCharge = COALESCE(SUM(
+            CASE rt.Price_Level
+                WHEN 'Low' THEN 80.00
+                WHEN 'Medium' THEN 120.00
+                WHEN 'High' THEN 200.00
+                ELSE 100.00
+            END * @Nights
+        ), 0)
+        FROM Consist c
+        JOIN Room r ON c.Room_No = r.Room_No AND c.Branch_ID = r.Branch_ID
+        JOIN Room_Type rt ON r.Room_Type_ID = rt.Room_Type_ID
+        WHERE c.Booking_ID = @BookingID;
+
+        SELECT @ServiceCharge = COALESCE(SUM(
+            req.Number_of_times * COALESCE(ads.Price, la.Default_Price, fb.Price, 0)
+        ), 0)
+        FROM Require req
+        LEFT JOIN (
+            SELECT Service_Type_ID, MIN(Price) AS Price
+            FROM Additional_Service
+            GROUP BY Service_Type_ID
+        ) ads ON ads.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Laundry la ON la.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Food_Beverage fb ON fb.Service_Type_ID = req.Service_Type_ID
+        WHERE req.Booking_ID = @BookingID;
+
+        SET @TotalRoom += COALESCE(@RoomCharge, 0);
+        SET @TotalService += COALESCE(@ServiceCharge, 0);
+
+        SET @Idx += 1;
+    END;
+
+    INSERT INTO @Result
+    SELECT
+        @CustomerID,
+        @FromDate,
+        @ToDate,
+        @TotalRoom,
+        @TotalService,
+        (@TotalRoom + @TotalService);
+
+    RETURN;
+END;
+
+---------------------------------------------------------------------------------------
+GO
+CREATE OR ALTER FUNCTION fnBranchRevenue
+(
+    @BranchID INT,
+    @StartDate DATE,
+    @EndDate DATE
+)
+RETURNS @Result TABLE
+(
+    Branch_ID INT,
+    StartDate DATE,
+    EndDate DATE,
+    TotalRoomRevenue DECIMAL(18,2),
+    TotalServiceRevenue DECIMAL(18,2),
+    TotalRevenue DECIMAL(18,2)
+)
+AS
+BEGIN
+    IF @BranchID IS NULL OR @BranchID <= 0 RETURN;
+    IF NOT EXISTS (SELECT 1 FROM Branch WHERE Branch_ID = @BranchID) RETURN;
+    IF @StartDate IS NULL OR @EndDate IS NULL RETURN;
+    IF @StartDate > @EndDate RETURN;
+
+    DECLARE @Bookings TABLE
+    (
+        RowNum INT IDENTITY(1,1),
+        Booking_ID INT,
+        CheckIn DATE,
+        CheckOut DATE
+    );
+
+    INSERT INTO @Bookings (Booking_ID, CheckIn, CheckOut)
+    SELECT DISTINCT b.Booking_ID, b.CheckIn, b.CheckOut
+    FROM Booking b
+    JOIN Consist c ON b.Booking_ID = c.Booking_ID
+    WHERE c.Branch_ID = @BranchID
+      AND b.CheckIn >= @StartDate
+      AND b.CheckOut <= @EndDate;
+
+    DECLARE 
+        @MaxRow INT = (SELECT COUNT(*) FROM @Bookings),
+        @Idx INT = 1,
+        @BookingID INT,
+        @CheckIn DATE,
+        @CheckOut DATE,
+        @Nights INT,
+        @RoomCharge DECIMAL(18,2),
+        @ServiceCharge DECIMAL(18,2),
+        @TotalRoom DECIMAL(18,2) = 0,
+        @TotalService DECIMAL(18,2) = 0;
+
+    WHILE @Idx <= @MaxRow
+    BEGIN
+        SELECT 
+            @BookingID = Booking_ID,
+            @CheckIn = CheckIn,
+            @CheckOut = CheckOut
+        FROM @Bookings
+        WHERE RowNum = @Idx;
+
+        SET @Nights = DATEDIFF(DAY, @CheckIn, @CheckOut);
+        IF @Nights <= 0 SET @Nights = 1;
+
+        SELECT @RoomCharge = COALESCE(SUM(
+            CASE rt.Price_Level
+                WHEN 'Low' THEN 80.00
+                WHEN 'Medium' THEN 120.00
+                WHEN 'High' THEN 200.00
+                ELSE 100.00
+            END * @Nights
+        ), 0)
+        FROM Consist c
+        JOIN Room r ON c.Room_No = r.Room_No AND c.Branch_ID = r.Branch_ID
+        JOIN Room_Type rt ON r.Room_Type_ID = rt.Room_Type_ID
+        WHERE c.Booking_ID = @BookingID
+          AND c.Branch_ID = @BranchID;
+
+        SELECT @ServiceCharge = COALESCE(SUM(
+            req.Number_of_times * COALESCE(ads.Price, la.Default_Price, fb.Price, 0)
+        ), 0)
+        FROM Require req
+        LEFT JOIN (
+            SELECT Service_Type_ID, MIN(Price) AS Price
+            FROM Additional_Service
+            GROUP BY Service_Type_ID
+        ) ads ON ads.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Laundry la ON la.Service_Type_ID = req.Service_Type_ID
+        LEFT JOIN Food_Beverage fb ON fb.Service_Type_ID = req.Service_Type_ID
+        WHERE req.Booking_ID = @BookingID;
+
+        SET @TotalRoom += COALESCE(@RoomCharge, 0);
+        SET @TotalService += COALESCE(@ServiceCharge, 0);
+
+        SET @Idx += 1;
+    END;
+
+    INSERT INTO @Result
+    SELECT
+        @BranchID,
+        @StartDate,
+        @EndDate,
+        @TotalRoom,
+        @TotalService,
+        (@TotalRoom + @TotalService);
+
+    RETURN;
+END;
+
+GO
+
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------
 -- SAMPLE DATA
 ---------------------------------------------------------------------------------------
@@ -1768,3 +2072,4 @@ INSERT INTO Require (Booking_ID, Service_Type_ID, Number_of_times) VALUES
 (3, 7,  3),  
 (4, 2,  1),  
 (5, 10, 2);  
+
