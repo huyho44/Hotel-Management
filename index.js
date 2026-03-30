@@ -1,6 +1,6 @@
 // index.js
 const express = require("express");
-const { sql, pool, poolConnect } = require("./db");
+const { sql, pool, poolConnect } = require("./config/db");
 
 const app = express();
 app.use(express.json());

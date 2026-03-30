@@ -1,7 +1,4 @@
-// db.js
-//const { sql, pool, poolConnect } = require("./db");
-
-require("dotenv").config();
+require("dotenv").config({ path: '../.env' });
 const sql = require("mssql");
 
 const dbConfig = {
