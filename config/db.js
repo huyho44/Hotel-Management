@@ -1,11 +1,11 @@
-require("dotenv").config({ path: '../.env' });
+require("dotenv").config();
 const sql = require("mssql");
 
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   server: process.env.DB_SERVER, // 127.0.0.1
-  database: process.env.DB_NAME, // "Hotel Management"
+  database: process.env.DB_DATABASE, // "Hotel Management"
   port: parseInt(process.env.DB_PORT, 10), // 1433
   options: {
     encrypt: false,
