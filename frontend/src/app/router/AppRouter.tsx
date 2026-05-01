@@ -3,7 +3,7 @@ import { AdminLayout } from "../layouts/AdminLayout";
 import { LoginPage } from "../../features/auth/pages/LoginPage";
 import { ROUTES } from "../../shared/constants/routes";
 import { ProtectedRoute } from "./ProtectedRoute";
-
+import { AdminDashboardPage } from "../../features/admin/page/AdminDashboardPage";
 function PlaceholderPage({
   title,
   description,
@@ -34,21 +34,13 @@ export function AppRouter() {
 
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path={ROUTES.admin} element={<AdminLayout />}>
-            <Route
-              index
-              element={
-                <PlaceholderPage
-                  title="Admin Dashboard"
-                  description="Trang tổng quan admin."
-                />
-              }
-            />
+            <Route index element={<AdminDashboardPage />} />
             <Route
               path="employees"
               element={
                 <PlaceholderPage
                   title="Employees"
-                  description="Map với GET/POST/PUT/DELETE /employees."
+                  description="Overall summary and quick links to employee management."
                 />
               }
             />
@@ -57,7 +49,7 @@ export function AppRouter() {
               element={
                 <PlaceholderPage
                   title="Managers"
-                  description="Map với GET/POST/PUT/DELETE /managers."
+                  description="Overall summary and quick links to manager management."
                 />
               }
             />
@@ -66,7 +58,7 @@ export function AppRouter() {
               element={
                 <PlaceholderPage
                   title="Receptionists"
-                  description="Map với GET/POST/PUT/DELETE /receptionists."
+                  description="Overall summary and quick links to receptionist management."
                 />
               }
             />
@@ -75,7 +67,7 @@ export function AppRouter() {
               element={
                 <PlaceholderPage
                   title="Service Staffs"
-                  description="Map với GET/POST/PUT/DELETE /service-staffs."
+                  description="Overall summary and quick links to service staff management."
                 />
               }
             />
@@ -84,7 +76,7 @@ export function AppRouter() {
               element={
                 <PlaceholderPage
                   title="Branches"
-                  description="Map với GET /branches."
+                  description="Overall summary and quick links to branch management."
                 />
               }
             />
@@ -93,7 +85,7 @@ export function AppRouter() {
               element={
                 <PlaceholderPage
                   title="Reports"
-                  description="Map với các report endpoints."
+                  description="Overall summary and quick links to branch revenue reports."
                 />
               }
             />
