@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "../layouts/AdminLayout";
-import { AuthLayout } from "../layouts/AuthLayout";
 import { LoginPage } from "../../features/auth/pages/LoginPage";
 import { ROUTES } from "../../shared/constants/routes";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -29,7 +28,7 @@ export function AppRouter() {
           element={<Navigate to={ROUTES.login} replace />}
         />
 
-        <Route element={<AuthLayout />}>
+        <Route>
           <Route path={ROUTES.login} element={<LoginPage />} />
         </Route>
 
