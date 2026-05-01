@@ -1,4 +1,4 @@
-# 🏨 Grand Ho Tram - Hotel Management System
+# 🏨 Hotel Management System
 
 A premium, full-stack hotel management solution built with modern web technologies and a robust SQL Server backend. This system enables comprehensive management of hotel operations, from HR and employee roles to complex booking engines and service performance tracking.
 
