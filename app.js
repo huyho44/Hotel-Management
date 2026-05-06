@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 const humanRoutes = require("./routes/humanRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
@@ -11,6 +12,7 @@ const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
 
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(express.static("public"));
 

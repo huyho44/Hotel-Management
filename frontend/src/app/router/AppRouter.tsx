@@ -4,6 +4,8 @@ import { LoginPage } from "../../features/auth/pages/LoginPage";
 import { ROUTES } from "../../shared/constants/routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AdminDashboardPage } from "../../features/admin/page/AdminDashboardPage";
+import { EmployeesPage } from "../../features/employees/page/EmployeesPage";
+
 function PlaceholderPage({
   title,
   description,
@@ -35,15 +37,7 @@ export function AppRouter() {
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path={ROUTES.admin} element={<AdminLayout />}>
             <Route index element={<AdminDashboardPage />} />
-            <Route
-              path="employees"
-              element={
-                <PlaceholderPage
-                  title="Employees"
-                  description="Overall summary and quick links to employee management."
-                />
-              }
-            />
+            <Route path="employees" element={<EmployeesPage />} />
             <Route
               path="managers"
               element={
